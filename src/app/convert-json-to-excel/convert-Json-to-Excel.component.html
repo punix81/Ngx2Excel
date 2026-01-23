@@ -1,0 +1,69 @@
+<div class="convert-json-container">
+  <h2>{{ 'convertJsonToExcel.title' | translate }}</h2>
+
+  <div class="description">
+    <p>{{ 'convertJsonToExcel.description' | translate }}</p>
+    <p class="format-info" [innerHTML]="'convertJsonToExcel.formatInfo' | translate"></p>
+  </div>
+
+  <div class="upload-section">
+    <div class="file-input-wrapper">
+      <label for="fileInput" class="file-label">
+        <span class="icon">📁</span>
+        <span>{{ 'convertJsonToExcel.chooseFiles' | translate }}</span>
+      </label>
+      <input
+        id="fileInput"
+        type="file"
+        accept=".json"
+        multiple
+        (change)="onFileSelected($event)"
+        class="file-input"
+      />
+    </div>
+
+    <div *ngIf="selectedFiles.length > 0" class="file-list">
+      <h3>{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }}):</h3>
+      <ul>
+        <li *ngFor="let file of selectedFiles">
+          {{ file.name }} <span class="file-size">({{ (file.size / 1024).toFixed(2) }} KB)</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="format-selection">
+      <label for="formatSelect">{{ 'convertJsonToExcel.outputFormat' | translate }}:</label>
+      <select id="formatSelect" (change)="onFormatChange($event)" [value]="outputFormat">
+        <option value="xlsx">{{ 'convertJsonToExcel.excel' | translate }}</option>
+        <option value="csv">{{ 'convertJsonToExcel.csv' | translate }}</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button
+        class="btn btn-primary"
+        (click)="convertFiles()"
+        [disabled]="isProcessing || selectedFiles.length === 0"
+      >
+        <span *ngIf="!isProcessing">🔄 {{ 'convertJsonToExcel.convertButton' | translate }}</span>
+        <span *ngIf="isProcessing">⏳ {{ 'convertJsonToExcel.processing' | translate }}</span>
+      </button>
+
+      <button
+        class="btn btn-secondary"
+        (click)="reset()"
+        [disabled]="isProcessing"
+      >
+        ↺ {{ 'convertJsonToExcel.resetButton' | translate }}
+      </button>
+    </div>
+
+    <div *ngIf="errorMessage" class="message error">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="message success">
+      ✓ {{ successMessage }}
+    </div>
+  </div>
+</div>

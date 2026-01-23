@@ -1,0 +1,18 @@
+{
+  "welcome": {
+    "title": "Bienvenue",
+    "message": "Bienvenue sur notre application",
+    "button": "Commencer"
+  },
+  "menu": {
+    "home": "Accueil",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "email": "Email invalide",
+    "password": "Mot de passe trop court"
+  }
+}
