@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
 
+type LocalConvertedFile = { fileData: Blob; fileName: string; fileExtension: string };
+
 describe('ConvertJsonToExcelService', () => {
 	let service: ConvertJsonToExcelService;
 
@@ -21,11 +23,11 @@ describe('ConvertJsonToExcelService', () => {
 	});
 
 	it('should generate CSV format via createTranslationTable', () => {
-		const json = { test: { key: 'value' } };
-		const map = new Map<string, any>();
+		const json = { test: { key: 'value' } } as Record<string, unknown>;
+		const map = new Map<string, Record<string, unknown>>();
 		map.set('test.json', json);
 
-		const result = (service as any).createTranslationTable(map, 'csv');
+		const result = (service as unknown as { createTranslationTable: (m: Map<string, Record<string, unknown>>, f: 'csv' | 'xlsx') => LocalConvertedFile }).createTranslationTable(map, 'csv');
 
 		expect(result).toBeDefined();
 		expect(result.fileExtension).toBe('csv');
@@ -34,11 +36,11 @@ describe('ConvertJsonToExcelService', () => {
 	});
 
 	it('should generate Excel (.xls) format via createTranslationTable', () => {
-		const json = { test: { key: 'value' } };
-		const map = new Map<string, any>();
+		const json = { test: { key: 'value' } } as Record<string, unknown>;
+		const map = new Map<string, Record<string, unknown>>();
 		map.set('test.json', json);
 
-		const result = (service as any).createTranslationTable(map, 'xlsx');
+		const result = (service as unknown as { createTranslationTable: (m: Map<string, Record<string, unknown>>, f: 'csv' | 'xlsx') => LocalConvertedFile }).createTranslationTable(map, 'xlsx');
 
 		expect(result).toBeDefined();
 		expect(result.fileExtension).toBe('xls');

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 
@@ -14,7 +14,10 @@ export class TranslationService {
   private readonly DEFAULT_LANG = 'en';
   private readonly AVAILABLE_LANGS = ['en', 'fr'];
 
-  constructor(private translate: TranslateService) {
+  // prefer inject() over constructor injection
+  private readonly translate = inject(TranslateService);
+
+  constructor() {
     this.initializeTranslation();
   }
 
@@ -68,8 +71,8 @@ export class TranslationService {
    * @param key Clé de traduction
    * @param params Paramètres d'interpolation (optionnel)
    */
-  instant(key: string, params?: any): string {
-    return this.translate.instant(key, params);
+  instant(key: string, params?: Record<string, unknown>): string {
+    return this.translate.instant(key, params as Record<string, unknown> | undefined);
   }
 
   /**
@@ -77,16 +80,16 @@ export class TranslationService {
    * @param key Clé de traduction
    * @param params Paramètres d'interpolation (optionnel)
    */
-  get(key: string, params?: any): Observable<string> {
-    return this.translate.get(key, params);
+  get(key: string, params?: Record<string, unknown>): Observable<string> {
+    return this.translate.get(key, params as Record<string, unknown> | undefined);
   }
 
   /**
    * Traduit plusieurs clés à la fois
    * @param keys Tableau de clés de traduction
    */
-  getMultiple(keys: string[]): Observable<any> {
-    return this.translate.get(keys);
+  getMultiple(keys: string[]): Observable<Record<string, string>> {
+    return this.translate.get(keys) as Observable<Record<string, string>>;
   }
 
   /**
@@ -115,9 +118,9 @@ export class TranslationService {
   /**
    * Recharge les traductions pour la langue courante
    */
-  reloadLang(lang?: string): Observable<any> {
+  reloadLang(lang?: string): Observable<Record<string, unknown>> {
     const langToReload = lang || this.getCurrentLanguage();
-    return this.translate.reloadLang(langToReload);
+    return this.translate.reloadLang(langToReload) as Observable<Record<string, unknown>>;
   }
 
   /**

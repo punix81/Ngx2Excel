@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { expect } from '@jest/globals';
 import { ConvertJsonToExcelComponent } from './convert-json-to-excel.component';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
-import { TranslateModule, TranslateService, TranslateLoader } from '@ngx-translate/core';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 // Mock TranslateLoader
@@ -25,7 +26,8 @@ describe('ConvertJsonToExcelComponent', () => {
 					loader: { provide: TranslateLoader, useClass: MockTranslateLoader }
 				})
 			],
-			providers: [ConvertJsonToExcelService]
+			providers: [ConvertJsonToExcelService],
+			schemas: [NO_ERRORS_SCHEMA]
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ConvertJsonToExcelComponent);

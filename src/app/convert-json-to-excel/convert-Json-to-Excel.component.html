@@ -22,14 +22,18 @@
       />
     </div>
 
-    <div *ngIf="selectedFiles.length > 0" class="file-list">
-      <h3>{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }}):</h3>
-      <ul>
-        <li *ngFor="let file of selectedFiles">
-          {{ file.name }} <span class="file-size">({{ (file.size / 1024).toFixed(2) }} KB)</span>
-        </li>
-      </ul>
-    </div>
+    @if (selectedFiles.length > 0) {
+      <div class="file-list">
+        <h3>{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }}):</h3>
+        <ul>
+          @for (file of selectedFiles; track file.name) {
+            <li>
+              {{ file.name }} <span class="file-size">({{ (file.size / 1024).toFixed(2) }} KB)</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
 
     <div class="format-selection">
       <label for="formatSelect">{{ 'convertJsonToExcel.outputFormat' | translate }}:</label>
@@ -45,8 +49,12 @@
         (click)="convertFiles()"
         [disabled]="isProcessing || selectedFiles.length === 0"
       >
-        <span *ngIf="!isProcessing">🔄 {{ 'convertJsonToExcel.convertButton' | translate }}</span>
-        <span *ngIf="isProcessing">⏳ {{ 'convertJsonToExcel.processing' | translate }}</span>
+        @if (!isProcessing) {
+          <span>🔄 {{ 'convertJsonToExcel.convertButton' | translate }}</span>
+        }
+        @if (isProcessing) {
+          <span>⏳ {{ 'convertJsonToExcel.processing' | translate }}</span>
+        }
       </button>
 
       <button
@@ -58,12 +66,16 @@
       </button>
     </div>
 
-    <div *ngIf="errorMessage" class="message error">
-      ⚠️ {{ errorMessage }}
-    </div>
+    @if (errorMessage) {
+      <div class="message error">
+        ⚠️ {{ errorMessage }}
+      </div>
+    }
 
-    <div *ngIf="successMessage" class="message success">
-      ✓ {{ successMessage }}
-    </div>
+    @if (successMessage) {
+      <div class="message success">
+        ✓ {{ successMessage }}
+      </div>
+    }
   </div>
 </div>

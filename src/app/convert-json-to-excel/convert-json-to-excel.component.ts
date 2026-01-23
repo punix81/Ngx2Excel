@@ -1,12 +1,12 @@
-import { Component, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, effect, inject } from '@angular/core';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
 
 @Component({
   selector: 'app-convert-json-to-excel',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [TranslateModule],
   templateUrl: './convert-Json-to-Excel.component.html',
   styleUrls: ['./convert-json-to-excel.component.scss']
 })
@@ -15,7 +15,10 @@ export class ConvertJsonToExcelComponent {
   successMessage = '';
   outputFormat: 'xlsx' | 'csv' = 'xlsx';
 
-  constructor(public convertService: ConvertJsonToExcelService) {
+  // Prefer inject() as per lint rule
+  public readonly convertService = inject(ConvertJsonToExcelService);
+
+  constructor() {
     // Réagir automatiquement quand un résultat est disponible
     effect(() => {
       const res = this.convertService.result();

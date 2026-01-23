@@ -1,10 +1,8 @@
 {
   "app.title": "Ngx2Excel - Convertisseur JSON & Excel",
   "app.subtitle": "Convertissez vos fichiers facilement",
-
   "routes.admin.translation.convertExcel": "Convertir Excel vers JSON",
   "routes.admin.translation.convertJson": "Convertir JSON vers Excel",
-
   "convertExcelToJson.title": "Convertir Excel en JSON",
   "convertExcelToJson.description": "Téléchargez vos fichiers Excel et convertissez-les au format JSON",
   "convertExcelToJson.uploadButton": "Choisir des fichiers Excel",
@@ -18,7 +16,6 @@
   "convertExcelToJson.notifications.convertSuccess": "Fichiers convertis avec succès",
   "convertExcelToJson.notifications.convertError": "Erreur lors de la conversion des fichiers",
   "convertExcelToJson.notifications.noFilesSelected": "Veuillez sélectionner au moins un fichier",
-
   "convertJsonToExcel.title": "Fusionner des fichiers JSON en Excel/CSV",
   "convertJsonToExcel.description": "Sélectionnez plusieurs fichiers JSON de traduction (i18n) pour les fusionner en un seul tableau Excel ou CSV.",
   "convertJsonToExcel.formatInfo": "📊 Format : Une colonne 'key' + une colonne par fichier JSON",
@@ -33,7 +30,6 @@
   "convertJsonToExcel.notifications.success": "Fichier {{format}} généré avec succès !",
   "convertJsonToExcel.notifications.error": "Une erreur est survenue",
   "convertJsonToExcel.notifications.noFiles": "Veuillez sélectionner au moins un fichier JSON",
-
   "common.language": "Langue",
   "common.english": "Anglais",
   "common.french": "Français",

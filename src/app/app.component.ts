@@ -1,21 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ConvertJsonToExcelComponent } from './convert-json-to-excel/convert-json-to-excel.component';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule, CommonModule],
+  imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'Ngx2Excel2';
   currentLang = 'en';
 
-  constructor(private translate: TranslateService) {
+  // Prefer using inject() as recommended by @angular-eslint/prefer-inject
+  private readonly translate = inject(TranslateService);
+
+  constructor() {
     // Définir les langues disponibles
     this.translate.addLangs(['en', 'fr']);
     // Définir la langue par défaut
@@ -25,10 +28,6 @@ export class AppComponent implements OnInit {
     const langToUse = browserLang?.match(/en|fr/) ? browserLang : 'en';
     this.translate.use(langToUse);
     this.currentLang = langToUse;
-  }
-
-  ngOnInit(): void {
-    // Initialisation supplémentaire si nécessaire
   }
 
   switchLanguage(lang: string): void {

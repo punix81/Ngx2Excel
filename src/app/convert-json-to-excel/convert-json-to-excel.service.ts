@@ -30,15 +30,16 @@ export class ConvertJsonToExcelService {
 
     this.isProcessing.set(true);
 
-    const filesData: Map<string, any> = new Map();
+    const filesData: Map<string, unknown> = new Map();
     let filesProcessed = 0;
 
     files.forEach((file) => {
       const reader = new FileReader();
 
-      reader.onload = (e: any) => {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
         try {
-          const jsonData = JSON.parse(e.target.result);
+          const txt = (e.target as FileReader).result as string;
+          const jsonData = JSON.parse(txt) as Record<string, unknown>;
 
           // Stocker les données avec le nom du fichier
           filesData.set(file.name, jsonData);
@@ -50,7 +51,7 @@ export class ConvertJsonToExcelService {
               const result = this.createTranslationTable(filesData, outputFormat);
               this.result.set(result);
               this.success.set(`Fichier ${outputFormat.toUpperCase()} généré avec succès!`);
-            } catch (err: any) {
+            } catch (err) {
               const errorMessage = err instanceof Error ? err.message : String(err);
               this.error.set(`Erreur lors de la génération du fichier: ${errorMessage}`);
               this.result.set(null);
@@ -98,14 +99,14 @@ export class ConvertJsonToExcelService {
   /**
    * Crée une table de traduction avec les clés et les valeurs de chaque fichier
    */
-  private createTranslationTable(filesData: Map<string, any>, format: 'xlsx' | 'csv'): ConvertedJsonToExcelFile {
+  private createTranslationTable(filesData: Map<string, unknown>, format: 'xlsx' | 'csv'): ConvertedJsonToExcelFile {
     // Collecter toutes les clés uniques de tous les fichiers
     const allKeys = new Set<string>();
-    const flattenedFiles = new Map<string, Map<string, any>>();
+    const flattenedFiles = new Map<string, Map<string, string>>();
 
     // Aplatir chaque fichier JSON et collecter les clés
     filesData.forEach((data, fileName) => {
-      const flatData = this.flattenJson(data);
+      const flatData = this.flattenJson(data as Record<string, unknown>);
       flattenedFiles.set(fileName, flatData);
 
       flatData.forEach((_, key) => {
@@ -117,11 +118,11 @@ export class ConvertJsonToExcelService {
     const sortedKeys = Array.from(allKeys).sort();
 
     // Créer les données du tableau
-    const tableData: any[] = [];
+    const tableData: Record<string, string | undefined>[] = [];
     const headers = ['key', ...Array.from(filesData.keys())];
 
     sortedKeys.forEach(key => {
-      const row: any = { key: key };
+      const row: Record<string, string | undefined> = { key: key } as Record<string, string | undefined>;
 
       // Ajouter la valeur de chaque fichier pour cette clé
       filesData.forEach((_, fileName) => {
@@ -161,9 +162,9 @@ export class ConvertJsonToExcelService {
   /**
    * Génère un fichier CSV à partir des données
    */
-  private generateCSV(headers: string[], data: any[]): string {
+  private generateCSV(headers: string[], data: Record<string, string | undefined>[]): string {
     // Fonction pour échapper les valeurs CSV
-    const escapeCSV = (value: any): string => {
+    const escapeCSV = (value: string | undefined): string => {
       if (value === null || value === undefined) {
         return '';
       }
@@ -189,9 +190,9 @@ export class ConvertJsonToExcelService {
   /**
    * Génère un fichier Excel au format XML (compatible Excel 2003+)
    */
-  private generateExcelXML(headers: string[], data: any[]): string {
+  private generateExcelXML(headers: string[], data: Record<string, string | undefined>[]): string {
     // Fonction pour échapper les caractères XML
-    const escapeXML = (value: any): string => {
+    const escapeXML = (value: string | undefined): string => {
       if (value === null || value === undefined) {
         return '';
       }
@@ -238,13 +239,19 @@ export class ConvertJsonToExcelService {
    * Aplatit un objet JSON en Map avec clés et valeurs
    * Exemple: {welcome: {title: "Hello"}} => Map("welcome.title" => "Hello")
    */
-  private flattenJson(data: any, prefix: string = ''): Map<string, any> {
-    const result = new Map<string, any>();
+  private flattenJson(data: Record<string, unknown>, prefix: string = ''): Map<string, string> {
+    const result = new Map<string, string>();
 
-    const flatten = (current: any, currentPrefix: string): void => {
-      for (const key in current) {
-        if (current.hasOwnProperty(key)) {
-          const value = current[key];
+    const flatten = (current: unknown, currentPrefix: string): void => {
+      if (typeof current !== 'object' || current === null) {
+        return;
+      }
+
+      const obj = current as Record<string, unknown>;
+
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const value = obj[key];
           const newKey = currentPrefix ? `${currentPrefix}.${key}` : key;
 
           if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -255,7 +262,7 @@ export class ConvertJsonToExcelService {
             result.set(newKey, JSON.stringify(value));
           } else {
             // Valeur simple: ajouter directement
-            result.set(newKey, value ?? '');
+            result.set(newKey, (value ?? '') as string);
           }
         }
       }
