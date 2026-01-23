@@ -1,8 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import {provideTranslateService, TranslateLoader, Translation} from "@ngx-translate/core";
-import { provideAnimations } from '@angular/platform-browser/animations';
+import {provideTranslateService} from "@ngx-translate/core";
 
 
 import { routes } from './app.routes';
@@ -13,7 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(),
-    provideAnimations(),
       provideTranslateService({
           loader: provideTranslateHttpLoader({
               // Use a relative path (no leading slash) so the dev-server serves from the app base href
