@@ -3,10 +3,26 @@ import { Component, effect, inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
 
+// Explicit Angular Material imports (statically analyzable)
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 @Component({
   selector: 'app-convert-json-to-excel',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [
+    TranslateModule,
+    MatCardModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './convert-Json-to-Excel.component.html',
   styleUrls: ['./convert-json-to-excel.component.scss']
 })
@@ -14,6 +30,7 @@ export class ConvertJsonToExcelComponent {
   selectedFiles: File[] = [];
   successMessage = '';
   outputFormat: 'xlsx' | 'csv' = 'xlsx';
+  displayedColumns = ['name', 'size'];
 
   // Prefer inject() as per lint rule
   public readonly convertService = inject(ConvertJsonToExcelService);

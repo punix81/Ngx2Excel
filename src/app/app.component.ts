@@ -3,11 +3,14 @@ import { RouterOutlet } from '@angular/router';
 import { ConvertJsonToExcelComponent } from './convert-json-to-excel/convert-json-to-excel.component';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 
+// Explicit Material imports
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule],
+  imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule, MatToolbarModule, MatButtonModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
