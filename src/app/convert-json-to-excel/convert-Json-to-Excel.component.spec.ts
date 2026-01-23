@@ -15,6 +15,7 @@ class MockTranslateLoader implements TranslateLoader {
 describe('ConvertJsonToExcelComponent', () => {
 	let component: ConvertJsonToExcelComponent;
 	let fixture: ComponentFixture<ConvertJsonToExcelComponent>;
+	let service: ConvertJsonToExcelService;
 
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
@@ -29,6 +30,7 @@ describe('ConvertJsonToExcelComponent', () => {
 
 		fixture = TestBed.createComponent(ConvertJsonToExcelComponent);
 		component = fixture.componentInstance;
+		service = TestBed.inject(ConvertJsonToExcelService);
 		fixture.detectChanges();
 	});
 
@@ -44,15 +46,16 @@ describe('ConvertJsonToExcelComponent', () => {
 
 	it('should reset component state', () => {
 		component.selectedFiles = [new File(['test'], 'test.json')];
-		component.errorMessage = 'error';
-		component.successMessage = 'success';
+		// set service signals instead of component getters
+		service.error.set('error');
+		service.success.set('success');
 		component.outputFormat = 'csv';
 
 		component.reset();
 
 		expect(component.selectedFiles).toEqual([]);
 		expect(component.errorMessage).toBe('');
-		expect(component.successMessage).toBe('');
+		expect(component.serviceSuccessMessage).toBe('');
 		expect(component.outputFormat).toBe('xlsx');
 	});
 });

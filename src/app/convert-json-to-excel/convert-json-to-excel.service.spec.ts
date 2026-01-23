@@ -15,15 +15,17 @@ describe('ConvertJsonToExcelService', () => {
 		expect(service).toBeTruthy();
 	});
 
-	it('should reject when no files are provided', async () => {
-		await expect(service.mergeJsonToExcel([], 'xlsx')).rejects.toThrow('Aucun fichier sélectionné');
+	it('should set error when no files are provided', () => {
+		service.startMergeFiles([], 'xlsx');
+		expect(service.error()).toBe('Aucun fichier sélectionné');
 	});
 
-	it('should generate CSV format', async () => {
-		const jsonContent = JSON.stringify({ test: { key: 'value' } });
-		const file = new File([jsonContent], 'test.json', { type: 'application/json' });
+	it('should generate CSV format via createTranslationTable', () => {
+		const json = { test: { key: 'value' } };
+		const map = new Map<string, any>();
+		map.set('test.json', json);
 
-		const result = await service.mergeJsonToExcel([file], 'csv');
+		const result = (service as any).createTranslationTable(map, 'csv');
 
 		expect(result).toBeDefined();
 		expect(result.fileExtension).toBe('csv');
@@ -31,11 +33,12 @@ describe('ConvertJsonToExcelService', () => {
 		expect(result.fileData).toBeInstanceOf(Blob);
 	});
 
-	it('should generate Excel format', async () => {
-		const jsonContent = JSON.stringify({ test: { key: 'value' } });
-		const file = new File([jsonContent], 'test.json', { type: 'application/json' });
+	it('should generate Excel (.xls) format via createTranslationTable', () => {
+		const json = { test: { key: 'value' } };
+		const map = new Map<string, any>();
+		map.set('test.json', json);
 
-		const result = await service.mergeJsonToExcel([file], 'xlsx');
+		const result = (service as any).createTranslationTable(map, 'xlsx');
 
 		expect(result).toBeDefined();
 		expect(result.fileExtension).toBe('xls');

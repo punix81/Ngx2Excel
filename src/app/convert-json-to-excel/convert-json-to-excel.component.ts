@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
@@ -12,12 +12,47 @@ import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
 })
 export class ConvertJsonToExcelComponent {
   selectedFiles: File[] = [];
-  isProcessing = false;
-  errorMessage = '';
   successMessage = '';
   outputFormat: 'xlsx' | 'csv' = 'xlsx';
 
-  constructor(private convertService: ConvertJsonToExcelService) {}
+  constructor(public convertService: ConvertJsonToExcelService) {
+    // Réagir automatiquement quand un résultat est disponible
+    effect(() => {
+      const res = this.convertService.result();
+      if (res) {
+        // Télécharger automatiquement le fichier généré
+        try {
+          this.convertService.downloadFile(res);
+          this.successMessage = `Fichier ${res.fileExtension.toUpperCase()} généré avec succès!`;
+          this.selectedFiles = [];
+        } finally {
+          // Clear result after download
+          this.convertService.clearResult();
+        }
+      }
+    });
+
+    // Synchroniser message d'erreur si besoin (optionnel)
+    effect(() => {
+      const err = this.convertService.error();
+      if (err) {
+        // nothing else, template can read service.error()
+      }
+    });
+  }
+
+  // Getters pour exposer directement l'état du service
+  get isProcessing(): boolean {
+    return this.convertService.isProcessing();
+  }
+
+  get errorMessage(): string {
+    return this.convertService.error();
+  }
+
+  get serviceSuccessMessage(): string {
+    return this.convertService.success();
+  }
 
   /**
    * Gère la sélection de fichiers
@@ -26,8 +61,8 @@ export class ConvertJsonToExcelComponent {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles = Array.from(input.files);
-      this.errorMessage = '';
-      this.successMessage = '';
+      // Clear previous messages
+      this.convertService.clearResult();
     }
   }
 
@@ -40,28 +75,16 @@ export class ConvertJsonToExcelComponent {
   }
 
   /**
-   * Convertit et fusionne les fichiers
+   * Convertit et fusionne les fichiers (utilise les signals du service)
    */
-  async convertFiles(): Promise<void> {
+  convertFiles(): void {
     if (this.selectedFiles.length === 0) {
-      this.errorMessage = 'Veuillez sélectionner au moins un fichier JSON';
+      this.convertService.error.set('Veuillez sélectionner au moins un fichier JSON');
       return;
     }
 
-    this.isProcessing = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    try {
-      const result = await this.convertService.mergeJsonToExcel(this.selectedFiles, this.outputFormat);
-      this.convertService.downloadFile(result);
-      this.successMessage = `Fichier ${this.outputFormat.toUpperCase()} généré avec succès!`;
-      this.selectedFiles = [];
-    } catch (error: any) {
-      this.errorMessage = error.message || 'Une erreur est survenue';
-    } finally {
-      this.isProcessing = false;
-    }
+    // Démarrer la fusion ; résultat et état sont gérés par les signals
+    this.convertService.startMergeFiles(this.selectedFiles, this.outputFormat);
   }
 
   /**
@@ -69,8 +92,7 @@ export class ConvertJsonToExcelComponent {
    */
   reset(): void {
     this.selectedFiles = [];
-    this.errorMessage = '';
-    this.successMessage = '';
     this.outputFormat = 'xlsx';
+    this.convertService.clearResult();
   }
 }

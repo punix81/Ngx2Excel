@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, WritableSignal, signal } from '@angular/core';
 import { ConvertedJsonToExcelFile } from './converted-json-to-excel-file';
 
 @Injectable({
@@ -6,52 +6,81 @@ import { ConvertedJsonToExcelFile } from './converted-json-to-excel-file';
 })
 export class ConvertJsonToExcelService {
 
+  // Signals representing the processing state and results
+  readonly isProcessing: WritableSignal<boolean> = signal(false);
+  readonly error: WritableSignal<string> = signal('');
+  readonly success: WritableSignal<string> = signal('');
+  readonly result: WritableSignal<ConvertedJsonToExcelFile | null> = signal(null);
+
   /**
-   * Fusionne plusieurs fichiers JSON de traduction en un seul fichier Excel ou CSV
-   * Format: key | file1.json | file2.json | file3.json
-   * @param files - Liste des fichiers JSON à fusionner
-   * @param outputFormat - Format de sortie ('xlsx' ou 'csv')
-   * @returns Le fichier fusionné
+   * Démarre la fusion des fichiers JSON en un fichier Excel ou CSV.
+   * Ne renvoie rien : les résultats et l'état sont exposés via des Signals.
    */
-  mergeJsonToExcel(files: File[], outputFormat: 'xlsx' | 'csv' = 'xlsx'): Promise<ConvertedJsonToExcelFile> {
-    return new Promise((resolve, reject) => {
-      const filesData: Map<string, any> = new Map();
-      let filesProcessed = 0;
+  startMergeFiles(files: File[], outputFormat: 'xlsx' | 'csv' = 'xlsx'): void {
+    // Reset signals
+    this.isProcessing.set(false);
+    this.error.set('');
+    this.success.set('');
+    this.result.set(null);
 
-      if (files.length === 0) {
-        reject(new Error('Aucun fichier sélectionné'));
-        return;
-      }
+    if (!files || files.length === 0) {
+      this.error.set('Aucun fichier sélectionné');
+      return;
+    }
 
-      files.forEach((file) => {
-        const reader = new FileReader();
+    this.isProcessing.set(true);
 
-        reader.onload = (e: any) => {
-          try {
-            const jsonData = JSON.parse(e.target.result);
+    const filesData: Map<string, any> = new Map();
+    let filesProcessed = 0;
 
-            // Stocker les données avec le nom du fichier
-            filesData.set(file.name, jsonData);
-            filesProcessed++;
+    files.forEach((file) => {
+      const reader = new FileReader();
 
-            // Quand tous les fichiers sont traités
-            if (filesProcessed === files.length) {
+      reader.onload = (e: any) => {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+
+          // Stocker les données avec le nom du fichier
+          filesData.set(file.name, jsonData);
+          filesProcessed++;
+
+          // Quand tous les fichiers sont traités
+          if (filesProcessed === files.length) {
+            try {
               const result = this.createTranslationTable(filesData, outputFormat);
-              resolve(result);
+              this.result.set(result);
+              this.success.set(`Fichier ${outputFormat.toUpperCase()} généré avec succès!`);
+            } catch (err: any) {
+              const errorMessage = err instanceof Error ? err.message : String(err);
+              this.error.set(`Erreur lors de la génération du fichier: ${errorMessage}`);
+              this.result.set(null);
+            } finally {
+              this.isProcessing.set(false);
             }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            reject(new Error(`Erreur lors de la lecture du fichier ${file.name}: ${errorMessage}`));
           }
-        };
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          this.error.set(`Erreur lors de la lecture du fichier ${file.name}: ${errorMessage}`);
+          this.isProcessing.set(false);
+        }
+      };
 
-        reader.onerror = () => {
-          reject(new Error(`Erreur lors de la lecture du fichier ${file.name}`));
-        };
+      reader.onerror = () => {
+        this.error.set(`Erreur lors de la lecture du fichier ${file.name}`);
+        this.isProcessing.set(false);
+      };
 
-        reader.readAsText(file);
-      });
+      reader.readAsText(file);
     });
+  }
+
+  /**
+   * Efface le résultat courant (utile après téléchargement)
+   */
+  clearResult(): void {
+    this.result.set(null);
+    this.success.set('');
+    this.error.set('');
   }
 
   /**
