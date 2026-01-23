@@ -1,11 +1,13 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, ViewChild } from '@angular/core';
+
 
 import { TranslateModule } from '@ngx-translate/core';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
+import { MatSelectChange } from '@angular/material/select';
 
 // Explicit Angular Material imports (statically analyzable)
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource, MatTable } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,16 +23,20 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
-    MatProgressSpinnerModule,
-  ],
+    MatProgressSpinnerModule
+],
   templateUrl: './convert-Json-to-Excel.component.html',
   styleUrls: ['./convert-json-to-excel.component.scss']
 })
 export class ConvertJsonToExcelComponent {
   selectedFiles: File[] = [];
+  // DataSource pour le mat-table
+  dataSource = new MatTableDataSource<File>(this.selectedFiles);
+  @ViewChild(MatTable) table?: MatTable<File>;
   successMessage = '';
   outputFormat: 'xlsx' | 'csv' = 'xlsx';
-  displayedColumns = ['name', 'size'];
+  // Colonnes affichées dans la table (doivent correspondre au template)
+  displayedColumns: string[] = ['name', 'size', 'actions'];
 
   // Prefer inject() as per lint rule
   public readonly convertService = inject(ConvertJsonToExcelService);
@@ -83,15 +89,41 @@ export class ConvertJsonToExcelComponent {
       this.selectedFiles = Array.from(input.files);
       // Clear previous messages
       this.convertService.clearResult();
+      // Mettre à jour la data source du tableau
+      this.dataSource.data = this.selectedFiles;
+      // forcer le rendu
+      setTimeout(() => this.table?.renderRows());
     }
+  }
+
+  /**
+   * Supprime un fichier sélectionné (séparé pour éviter les checks typés dans le template)
+   */
+  removeFile(file: File): void {
+    this.selectedFiles = this.selectedFiles.filter(f => f !== file);
+    this.dataSource.data = this.selectedFiles;
+    setTimeout(() => this.table?.renderRows());
+  }
+
+  /** Formatte la taille en KB avec 2 décimales (utilisé pour éviter la dépendance à la pipe number dans le template) */
+  formatSize(sizeInBytes: number | undefined): string {
+    if (!sizeInBytes && sizeInBytes !== 0) return '';
+    const kb = sizeInBytes / 1024;
+    return kb.toFixed(2) + ' KB';
+  }
+
+  /**
+   * trackBy pour *ngFor : identifie les fichiers de façon stable par leur nom et taille
+   */
+  trackByFile(index: number, file: File): string {
+    return `${file.name}_${file.size}`;
   }
 
   /**
    * Change le format de sortie
    */
-  onFormatChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.outputFormat = select.value as 'xlsx' | 'csv';
+  onFormatChange(event: MatSelectChange): void {
+    this.outputFormat = event.value as 'xlsx' | 'csv';
   }
 
   /**
@@ -114,5 +146,7 @@ export class ConvertJsonToExcelComponent {
     this.selectedFiles = [];
     this.outputFormat = 'xlsx';
     this.convertService.clearResult();
+    this.dataSource.data = this.selectedFiles;
+    setTimeout(() => this.table?.renderRows());
   }
 }
