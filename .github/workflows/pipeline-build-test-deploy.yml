@@ -148,10 +148,10 @@ jobs:
           echo "Attempt to run build using local ng if present, else use global ng if available"
           if [ -x node_modules/.bin/ng ]; then
             echo "Running local ng build"
-            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/app/"
+            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/"
           elif command -v ng >/dev/null 2>&1; then
             echo "Local ng missing, using global ng"
-            ng build --configuration production --base-href "/Ngx2Excel/app/"
+            ng build --configuration production --base-href "/Ngx2Excel/"
           else
             echo "ERROR: ng CLI not found locally or globally"; exit 3
           fi
@@ -160,10 +160,17 @@ jobs:
         working-directory: ${{ steps.find.outputs.proj-dir }}
         run: ls -R ./dist || true
 
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@3.1.1
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          ftp-server: "${{ secrets.CD_FTP_SERVER }}"
-          ftp-username: "${{ secrets.CD_FTP_USERNAME }}"
-          ftp-password: "${{ secrets.CD_FTP_PASSWORD }}"
-          local-dir: "dist/"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.find.outputs.proj-dir }}/dist/ngx2-excel2/browser
+          publish_branch: gh-pages
+
+      # - name: FTP Deploy
+      #   uses: SamKirkland/FTP-Deploy-Action@3.1.1
+      #   with:
+      #     ftp-server: "${{ secrets.CD_FTP_SERVER }}"
+      #     ftp-username: "${{ secrets.CD_FTP_USERNAME }}"
+      #     ftp-password: "${{ secrets.CD_FTP_PASSWORD }}"
+      #     local-dir: "dist/"
