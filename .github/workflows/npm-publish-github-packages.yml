@@ -19,9 +19,16 @@ jobs:
           node-version: '18'
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev --loglevel=verbose
       - name: Build
-        run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
+        run: |
+          if [ -x node_modules/.bin/ng ]; then
+            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/app/"
+          elif command -v ng >/dev/null 2>&1; then
+            ng build --configuration production --base-href "/Ngx2Excel/app/"
+          else
+            echo "ERROR: ng not found"; exit 1
+          fi
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

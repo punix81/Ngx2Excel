@@ -22,36 +22,45 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Debug versions
+      - name: Ensure stable npm
         run: |
-          node -v
-          npm -v
+          npm install -g npm@10 || true
+          npm -v || true
+
+      - name: Find project root
+        id: find
+        run: |
+          if [ -f package.json ]; then
+            echo "proj-dir=." >> $GITHUB_OUTPUT
+          else
+            P=$(find . -maxdepth 4 -name package.json | head -n 1 || true)
+            if [ -n "$P" ]; then
+              D=$(dirname "$P")
+              echo "proj-dir=$D" >> $GITHUB_OUTPUT
+            else
+              echo "proj-dir=." >> $GITHUB_OUTPUT
+            fi
+          fi
 
       - name: Install dependencies (including dev)
+        working-directory: ${{ steps.find.outputs.proj-dir }}
         run: |
-          # Install devDependencies so @angular/cli (ng) is available for the build
-          npm ci --include=dev
-          echo "node_modules/.bin contents:"
-          ls -la node_modules/.bin | sed -n '1,200p'
-          echo "ng version (from node_modules/.bin):"
-          node_modules/.bin/ng --version
+          npm ci --include=dev --loglevel=verbose || npm install --include=dev --loglevel=verbose
+          ls -la node_modules/.bin || true
 
       - name: Build
-        run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
+        working-directory: ${{ steps.find.outputs.proj-dir }}
+        run: |
+          if [ -x node_modules/.bin/ng ]; then
+            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/app/"
+          elif command -v ng >/dev/null 2>&1; then
+            ng build --configuration production --base-href "/Ngx2Excel/app/"
+          else
+            echo "ERROR: ng not found"; exit 1
+          fi
 
-      # If a personal access token secret GH_PAGES_TOKEN is provided, use it (useful when GITHUB_TOKEN lacks push rights)
-      - name: Deploy to GitHub Pages (using GH_PAGES_TOKEN)
-        if: secrets.GH_PAGES_TOKEN != ''
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GH_PAGES_TOKEN }}
-          publish_dir: ./dist/ngx2-excel2
-
-      # Otherwise fall back to the default GITHUB_TOKEN
-      - name: Deploy to GitHub Pages (using GITHUB_TOKEN)
-        if: secrets.GH_PAGES_TOKEN == ''
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

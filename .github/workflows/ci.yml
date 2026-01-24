@@ -10,19 +10,46 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Install dependencies (incl. dev)
+      - name: Ensure stable npm
         run: |
-          # Ensure devDependencies (including @angular/cli) are installed
-          npm ci --include=dev
+          npm install -g npm@10 || true
+          npm -v || true
 
-      - name: Build (production)
-        run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
+      - name: Find project root
+        id: find
+        run: |
+          if [ -f package.json ]; then
+            echo "proj-dir=." >> $GITHUB_OUTPUT
+          else
+            P=$(find . -maxdepth 4 -name package.json | head -n 1 || true)
+            if [ -n "$P" ]; then
+              D=$(dirname "$P")
+              echo "proj-dir=$D" >> $GITHUB_OUTPUT
+            else
+              echo "proj-dir=." >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Install dependencies (incl dev)
+        working-directory: ${{ steps.find.outputs.proj-dir }}
+        run: |
+          npm ci --include=dev --loglevel=verbose || npm install --include=dev --loglevel=verbose
+
+      - name: Build
+        working-directory: ${{ steps.find.outputs.proj-dir }}
+        run: |
+          if [ -x node_modules/.bin/ng ]; then
+            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/app/"
+          elif command -v ng >/dev/null 2>&1; then
+            ng build --configuration production --base-href "/Ngx2Excel/app/"
+          else
+            echo "ERROR: ng not found"; exit 1
+          fi
