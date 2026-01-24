@@ -20,7 +20,8 @@ const config: Config = {
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.[jt]s?(x)',
-    '<rootDir>/src/**/?(*.)+(spec|test).[jt]s?(x)'
+    '<rootDir>/src/**/*.spec.[jt]s',
+    '<rootDir>/src/**/*.test.[jt]s'
   ]
 };
 

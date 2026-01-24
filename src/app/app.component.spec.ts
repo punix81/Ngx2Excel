@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
 
 // Mock TranslateLoader
 class MockTranslateLoader implements TranslateLoader {
@@ -15,6 +16,7 @@ describe('AppComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         AppComponent,
+        RouterTestingModule,
         TranslateModule.forRoot({
           loader: { provide: TranslateLoader, useClass: MockTranslateLoader }
         })
