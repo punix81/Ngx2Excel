@@ -1,3 +1,4 @@
 export const environment = {
-  production: false
+  production: false,
+  version: '__APP_VERSION__'
 };

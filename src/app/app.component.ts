@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import {MatCard, MatCardContent} from "@angular/material/card";
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,7 @@ export class AppComponent {
   currentLang = 'en';
 
   // Version (synchronisée avec package.json)
-  readonly version = '0.0.0';
+  readonly version = environment.version;
 
   // Année courante exposée au template pour éviter expressions complexes dans le HTML
   readonly currentYear = new Date().getFullYear();
