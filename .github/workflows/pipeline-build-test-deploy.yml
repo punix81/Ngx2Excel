@@ -34,9 +34,25 @@ jobs:
       - name: Install Dependencies (including dev)
         run: npm ci --include=dev
 
+      - name: Verify installed CLI binaries
+        run: |
+          echo "node version: $(node -v)"
+          echo "npm version: $(npm -v)"
+          echo "Listing node_modules/.bin (first 200 entries):"
+          ls -la node_modules/.bin | sed -n '1,200p' || true
+          echo "jest binary present?"; test -x node_modules/.bin/jest && echo "jest ok" || echo "jest missing"
+          echo "ng binary present?"; test -x node_modules/.bin/ng && echo "ng ok" || echo "ng missing"
+          echo "jest version (if present):"; node_modules/.bin/jest --version || true
+          echo "ng version (if present):"; node_modules/.bin/ng --version || true
+
       - name: Run Unit Tests
-        # project has test:ci script (mapped to jest CI runner)
-        run: npm run test:ci
+        # prefer calling the local jest binary directly to avoid PATH issues
+        run: |
+          if [ -x node_modules/.bin/jest ]; then
+            node_modules/.bin/jest --ci --coverage --maxWorkers=2
+          else
+            npm run test:ci
+          fi
 
       - name: Run codacy-coverage-reporter
         uses: codacy/codacy-coverage-reporter-action@master
