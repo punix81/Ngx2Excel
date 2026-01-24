@@ -30,13 +30,18 @@ jobs:
       - name: Install
         run: npm ci
 
-      # >>> ICI <<<
+      # ✅ LINT (bloquant)
+      - name: Lint
+        run: npm run lint
+
+      # 🔢 Injection de la version
       - name: Inject app version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "Building version $VERSION"
           sed -i "s/__APP_VERSION__/$VERSION/g" src/environments/environment*.ts
 
+      # 🏗 Build Angular
       - name: Build
         run: npx ng build --configuration production --base-href "/Ngx2Excel/"
 
