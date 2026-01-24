@@ -1,11 +1,7 @@
 {
   "name": "ngx2-excel",
   "version": "0.0.0",
-  "engines": {
-    "node": ">=20.19.0"
-  },
   "scripts": {
-    "prebuild": "node -e \"const [major,minor]=process.versions.node.split('.').map(n=>parseInt(n)); if(major<20 || (major===20 && minor<19)){console.error('ERROR: Node.js >=20.19.0 is required. Current: '+process.version); process.exit(3);} else {console.log('Node version OK: '+process.version);}\"",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -49,7 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
     "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
+    "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.5",
     "jest": "^30.1.3",
