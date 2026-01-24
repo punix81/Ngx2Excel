@@ -18,8 +18,28 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+
+      - name: Ensure npm uses public registry and sanitize lockfile
+        run: |
+          echo "Current npm registry: $(npm config get registry)"
+          echo "Setting npm registry to public registry.npmjs.org"
+          npm config set registry https://registry.npmjs.org/
+          echo "New npm registry: $(npm config get registry)"
+          if [ -f package-lock.json ]; then
+            echo "Sanitizing package-lock.json to replace repo.bit.admin.ch with registry.npmjs.org"
+            # Replace common internal repo host entries with public registry URLs
+            sed -i 's|https://repo.bit.admin.ch/repository/npm-group|https://registry.npmjs.org|g' package-lock.json || true
+            # If other forms exist (http), replace them as well
+            sed -i 's|http://repo.bit.admin.ch/repository/npm-group|https://registry.npmjs.org|g' package-lock.json || true
+            # show a short diff for debugging
+            git --no-pager diff -- package-lock.json | sed -n '1,200p' || true
+          else
+            echo "No package-lock.json present"
+          fi
+
       - name: Install dependencies
         run: npm ci --include=dev --loglevel=verbose
+
       - name: Build
         run: |
           if [ -x node_modules/.bin/ng ]; then
@@ -29,6 +49,7 @@ jobs:
           else
             echo "ERROR: ng not found"; exit 1
           fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
