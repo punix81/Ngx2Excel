@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -40,7 +41,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           npm version patch -m "chore(release): %s [skip ci]"
-          git push origin HEAD:main --follow-tags
+          # Use persisted credentials from actions/checkout; default GITHUB_TOKEN should allow push
+          git push --follow-tags origin HEAD:main
+          # If your repository has branch protection preventing GITHUB_TOKEN from pushing,
+          # create a Personal Access Token with repo permissions and add it as a secret (e.g. REPO_PAT).
+          # Then replace the push above with:
+          # git remote set-url origin https://x-access-token:${{ secrets.REPO_PAT }}@github.com/${{ github.repository }}
+          # git push --follow-tags origin HEAD:main
 
   build:
     runs-on: ubuntu-latest
