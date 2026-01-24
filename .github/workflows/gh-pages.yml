@@ -29,8 +29,14 @@ jobs:
           node -v
           npm -v
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies (including dev)
+        run: |
+          # Install devDependencies so @angular/cli (ng) is available for the build
+          npm ci --include=dev
+          echo "node_modules/.bin contents:"
+          ls -la node_modules/.bin | sed -n '1,200p'
+          echo "ng version (from node_modules/.bin):"
+          node_modules/.bin/ng --version
 
       - name: Build
         run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
