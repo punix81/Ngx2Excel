@@ -1,1 +1,34 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --text: rgba(0,0,0,0.87);
+  --muted: rgba(0,0,0,0.6);
+}
+
+.dark-theme {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: rgba(255,255,255,0.87);
+  --muted: rgba(255,255,255,0.6);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 200ms, color 200ms;
+}
+
+.mat-card {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+.mat-toolbar {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+mat-slide-toggle mat-icon {
+  font-size: 18px;
+  vertical-align: middle;
+}

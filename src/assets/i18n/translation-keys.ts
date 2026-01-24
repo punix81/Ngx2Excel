@@ -1,7 +1,3 @@
-/**
- * Clés de traduction structurées pour l'application
- * Ces clés correspondent aux fichiers de traduction en.json et fr.json
- */
 export const translationKeys = {
   i18n: {
     app: {

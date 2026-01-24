@@ -4,7 +4,6 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { RouterTestingModule } from '@angular/router/testing';
 
-// Mock TranslateLoader
 class MockTranslateLoader implements TranslateLoader {
   getTranslation() {
     return of({});

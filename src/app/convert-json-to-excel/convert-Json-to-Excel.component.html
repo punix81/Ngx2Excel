@@ -52,27 +52,22 @@
       </div>
     </div>
 
-    <!-- Affiche la table des fichiers si des fichiers sont sélectionnés -->
     @if (selectedFiles.length > 0) {
       <section class="files">
         <h3 class="files-title">{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }})</h3>
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 file-table" aria-label="{{ 'convertJsonToExcel.selectedFiles' | translate }}">
-          <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.fileName' | translate }}</th>
             <td mat-cell *matCellDef="let file">{{ file.name }}</td>
           </ng-container>
-          <!-- Size Column -->
           <ng-container matColumnDef="size">
             <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.size' | translate }}</th>
             <td mat-cell *matCellDef="let file">{{ formatSize(file.size) }}</td>
           </ng-container>
-          <!-- Actions Column -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.actions' | translate }}</th>
             <td mat-cell *matCellDef="let file">
               <button mat-icon-button color="warn" aria-label="{{ 'convertJsonToExcel.remove' | translate }}" (click)="removeFile(file)">
-                <!-- inline trash SVG -->
                 <svg width="18" height="18" viewBox="0 0 24 24">
                   <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -91,7 +86,6 @@
       </div>
     }
 
-    <!-- Placeholder si aucun fichier sélectionné -->
 
     <div class="messages">
       @if (errorMessage) {

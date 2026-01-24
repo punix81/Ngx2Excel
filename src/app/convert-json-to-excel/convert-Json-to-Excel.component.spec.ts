@@ -6,7 +6,6 @@ import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
-// Mock TranslateLoader
 class MockTranslateLoader implements TranslateLoader {
 	getTranslation() {
 		return of({});
@@ -48,7 +47,6 @@ describe('ConvertJsonToExcelComponent', () => {
 
 	it('should reset component state', () => {
 		component.selectedFiles = [new File(['test'], 'test.json')];
-		// set service signals instead of component getters
 		service.error.set('error');
 		service.success.set('success');
 		component.outputFormat = 'csv';

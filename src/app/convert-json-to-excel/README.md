@@ -73,7 +73,6 @@ Ce composant est configuré en mode standalone et peut être importé directemen
 ```typescript
 import { ConvertJsonToExcelComponent } from './path/to/convert-json-to-excel.component';
 
-// Dans votre module ou composant standalone
 imports: [ConvertJsonToExcelComponent]
 ```
 

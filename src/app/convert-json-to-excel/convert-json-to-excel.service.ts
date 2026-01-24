@@ -6,18 +6,12 @@ import { ConvertedJsonToExcelFile } from './converted-json-to-excel-file';
 })
 export class ConvertJsonToExcelService {
 
-  // Signals representing the processing state and results
   readonly isProcessing: WritableSignal<boolean> = signal(false);
   readonly error: WritableSignal<string> = signal('');
   readonly success: WritableSignal<string> = signal('');
   readonly result: WritableSignal<ConvertedJsonToExcelFile | null> = signal(null);
 
-  /**
-   * Démarre la fusion des fichiers JSON en un fichier Excel ou CSV.
-   * Ne renvoie rien : les résultats et l'état sont exposés via des Signals.
-   */
   startMergeFiles(files: File[], outputFormat: 'xlsx' | 'csv' = 'xlsx'): void {
-    // Reset signals
     this.isProcessing.set(false);
     this.error.set('');
     this.success.set('');
@@ -41,11 +35,9 @@ export class ConvertJsonToExcelService {
           const txt = (e.target as FileReader).result as string;
           const jsonData = JSON.parse(txt) as Record<string, unknown>;
 
-          // Stocker les données avec le nom du fichier
           filesData.set(file.name, jsonData);
           filesProcessed++;
 
-          // Quand tous les fichiers sont traités
           if (filesProcessed === files.length) {
             try {
               const result = this.createTranslationTable(filesData, outputFormat);
@@ -75,18 +67,12 @@ export class ConvertJsonToExcelService {
     });
   }
 
-  /**
-   * Efface le résultat courant (utile après téléchargement)
-   */
   clearResult(): void {
     this.result.set(null);
     this.success.set('');
     this.error.set('');
   }
 
-  /**
-   * Télécharge le fichier généré
-   */
   downloadFile(convertedFile: ConvertedJsonToExcelFile): void {
     const url = window.URL.createObjectURL(convertedFile.fileData);
     const link = document.createElement('a');
@@ -96,15 +82,10 @@ export class ConvertJsonToExcelService {
     window.URL.revokeObjectURL(url);
   }
 
-  /**
-   * Crée une table de traduction avec les clés et les valeurs de chaque fichier
-   */
   private createTranslationTable(filesData: Map<string, unknown>, format: 'xlsx' | 'csv'): ConvertedJsonToExcelFile {
-    // Collecter toutes les clés uniques de tous les fichiers
     const allKeys = new Set<string>();
     const flattenedFiles = new Map<string, Map<string, string>>();
 
-    // Aplatir chaque fichier JSON et collecter les clés
     filesData.forEach((data, fileName) => {
       const flatData = this.flattenJson(data as Record<string, unknown>);
       flattenedFiles.set(fileName, flatData);
@@ -114,17 +95,14 @@ export class ConvertJsonToExcelService {
       });
     });
 
-    // Trier les clés alphabétiquement
     const sortedKeys = Array.from(allKeys).sort();
 
-    // Créer les données du tableau
     const tableData: Record<string, string | undefined>[] = [];
     const headers = ['key', ...Array.from(filesData.keys())];
 
     sortedKeys.forEach(key => {
       const row: Record<string, string | undefined> = { key: key } as Record<string, string | undefined>;
 
-      // Ajouter la valeur de chaque fichier pour cette clé
       filesData.forEach((_, fileName) => {
         const flatData = flattenedFiles.get(fileName);
         row[fileName] = flatData?.get(key) || '';
@@ -133,7 +111,6 @@ export class ConvertJsonToExcelService {
       tableData.push(row);
     });
 
-    // Générer le fichier selon le format
     let blob: Blob;
     let fileExtension: string;
 
@@ -159,27 +136,20 @@ export class ConvertJsonToExcelService {
     };
   }
 
-  /**
-   * Génère un fichier CSV à partir des données
-   */
   private generateCSV(headers: string[], data: Record<string, string | undefined>[]): string {
-    // Fonction pour échapper les valeurs CSV
     const escapeCSV = (value: string | undefined): string => {
       if (value === null || value === undefined) {
         return '';
       }
       const strValue = String(value);
-      // Si la valeur contient des virgules, guillemets ou sauts de ligne, l'entourer de guillemets
       if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
         return `"${strValue.replace(/"/g, '""')}"`;
       }
       return strValue;
     };
 
-    // Créer la ligne d'en-tête
     const headerLine = headers.map(escapeCSV).join(',');
 
-    // Créer les lignes de données
     const dataLines = data.map(row => {
       return headers.map(header => escapeCSV(row[header])).join(',');
     });
@@ -187,11 +157,7 @@ export class ConvertJsonToExcelService {
     return [headerLine, ...dataLines].join('\n');
   }
 
-  /**
-   * Génère un fichier Excel au format XML (compatible Excel 2003+)
-   */
   private generateExcelXML(headers: string[], data: Record<string, string | undefined>[]): string {
-    // Fonction pour échapper les caractères XML
     const escapeXML = (value: string | undefined): string => {
       if (value === null || value === undefined) {
         return '';
@@ -211,14 +177,12 @@ export class ConvertJsonToExcelService {
     xml += '<Worksheet ss:Name="Translations">\n';
     xml += '<Table>\n';
 
-    // Ajouter les en-têtes
     xml += '<Row>\n';
     headers.forEach(header => {
       xml += `<Cell><Data ss:Type="String">${escapeXML(header)}</Data></Cell>\n`;
     });
     xml += '</Row>\n';
 
-    // Ajouter les données
     data.forEach(row => {
       xml += '<Row>\n';
       headers.forEach(header => {
@@ -235,10 +199,6 @@ export class ConvertJsonToExcelService {
     return xml;
   }
 
-  /**
-   * Aplatit un objet JSON en Map avec clés et valeurs
-   * Exemple: {welcome: {title: "Hello"}} => Map("welcome.title" => "Hello")
-   */
   private flattenJson(data: Record<string, unknown>, prefix: string = ''): Map<string, string> {
     const result = new Map<string, string>();
 
@@ -255,13 +215,10 @@ export class ConvertJsonToExcelService {
           const newKey = currentPrefix ? `${currentPrefix}.${key}` : key;
 
           if (value && typeof value === 'object' && !Array.isArray(value)) {
-            // Objet imbriqué: continuer à aplatir
             flatten(value, newKey);
           } else if (Array.isArray(value)) {
-            // Tableau: convertir en JSON string
             result.set(newKey, JSON.stringify(value));
           } else {
-            // Valeur simple: ajouter directement
             result.set(newKey, (value ?? '') as string);
           }
         }

@@ -1,14 +1,8 @@
-/* Put this in app.component.css */
-
-/* Accessible pairing:
-   - Header: dark grey (#374151) with white text
-   - Footer: deep teal (#0F766E) with white text
-*/
 .app-shell {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #f8fafc; /* subtle modern background */
+    background: #f8fafc;
 }
 
 .app-header {
@@ -18,7 +12,7 @@
 }
 
 .app-toolbar {
-    background: #374151; /* grey 700-ish */
+    background: #374151;
     color: #ffffff;
     height: 64px;
     padding: 0 12px;
@@ -51,7 +45,6 @@
     gap: 4px;
 }
 
-/* Main grows to push footer down */
 .app-main {
     flex: 1 1 auto;
     padding: 24px 16px;
@@ -87,9 +80,8 @@
     background: #ffffff;
 }
 
-/* Footer always bottom because of flex layout */
 .app-footer {
-    background: #0f766e; /* deep teal */
+    background: #0f766e;
     color: #ffffff;
     padding: 12px 16px;
     display: flex;
