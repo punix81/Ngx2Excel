@@ -18,11 +18,6 @@ body {
   transition: background-color 200ms, color 200ms;
 }
 
-.mat-card {
-  background-color: var(--surface) !important;
-  color: var(--text) !important;
-}
-
 .mat-toolbar {
   background-color: var(--surface) !important;
   color: var(--text) !important;

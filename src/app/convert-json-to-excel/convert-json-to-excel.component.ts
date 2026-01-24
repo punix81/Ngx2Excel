@@ -2,7 +2,6 @@ import { Component, effect, inject, ViewChild } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
 import { MatSelectChange } from '@angular/material/select';
-import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTableDataSource, MatTable } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -15,7 +14,6 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [
     TranslateModule,
-    MatCardModule,
     MatTableModule,
     MatFormFieldModule,
     MatSelectModule,

@@ -1,11 +1,10 @@
+<section class="convert-card" appearance="outlined">
+  <header>
+    <h2 class="card-title">{{ 'convertJsonToExcel.title' | translate }}</h2>
+    <p class="card-subtitle">{{ 'convertJsonToExcel.subtitle' | translate }}</p>
+  </header>
 
-<mat-card class="example-card" appearance="outlined">
-  <mat-card-header>
-    <mat-card-title>{{ 'convertJsonToExcel.title' | translate }}</mat-card-title>
-    <mat-card-subtitle>{{ 'convertJsonToExcel.subtitle' | translate }}</mat-card-subtitle>
-  </mat-card-header>
-
-  <mat-card-content>
+  <div class="card-content">
     <p class="lead">{{ 'convertJsonToExcel.description' | translate }}</p>
 
     <div class="controls">
@@ -30,28 +29,8 @@
           <mat-option value="csv">{{ 'convertJsonToExcel.csv' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
-
-      <div class="spacer"></div>
-
-      <div class="action-buttons">
-        <button
-          mat-flat-button
-          color="accent"
-          (click)="convertFiles()"
-          [disabled]="isProcessing || selectedFiles.length === 0"
-          >
-          @if (!isProcessing) {
-            {{ 'convertJsonToExcel.convertButton' | translate }}
-          }
-          @if (isProcessing) {
-            <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
-            <span class="processing-text">{{ 'convertJsonToExcel.processing' | translate }}</span>
-          }
-        </button>
-
-        <button mat-button color="warn" (click)="reset()" [disabled]="isProcessing">{{ 'convertJsonToExcel.resetButton' | translate }}</button>
-      </div>
     </div>
+
     @if (selectedFiles.length > 0) {
       <section class="files">
         <h3 class="files-title">{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }})</h3>
@@ -79,27 +58,50 @@
       </section>
     } @else {
       <div class="no-files">
-        <mat-card class="no-files-card">{{ 'convertJsonToExcel.noFilesSelected' | translate }}</mat-card>
+        <div class="no-files-card">{{ 'convertJsonToExcel.noFilesSelected' | translate }}</div>
       </div>
     }
+
     <div class="messages">
       @if (errorMessage) {
-        <mat-card class="message error">{{ errorMessage }}</mat-card>
+        <div class="message error">{{ errorMessage }}</div>
       }
       @if (serviceSuccessMessage || successMessage) {
-        <mat-card class="message success">{{ serviceSuccessMessage || successMessage }}</mat-card>
+        <div class="message success">{{ serviceSuccessMessage || successMessage }}</div>
       }
     </div>
-  </mat-card-content>
-
-  <mat-card-footer class="footer">
-    <small>{{ 'convertJsonToExcel.tip' | translate }}</small>
-  </mat-card-footer>
-
-  @if (isProcessing) {
+  </div>
+    @if (isProcessing) {
     <div class="overlay">
-      <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
-      <div class="overlay-text">{{ 'convertJsonToExcel.processing' | translate }}</div>
+        <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
+        <div class="overlay-text">{{ 'convertJsonToExcel.processing' | translate }}</div>
     </div>
-  }
-</mat-card>
+    }
+
+  <footer class="footer">
+    <small>{{ 'convertJsonToExcel.tip' | translate }}</small>
+
+      <div class="controls">
+          <div class="action-buttons">
+              <button
+                      mat-flat-button
+                      color="accent"
+                      (click)="convertFiles()"
+                      [disabled]="isProcessing || selectedFiles.length === 0"
+              >
+                  @if (!isProcessing) {
+                  {{ 'convertJsonToExcel.convertButton' | translate }}
+                  }
+                  @if (isProcessing) {
+                  <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+                  <span class="processing-text">{{ 'convertJsonToExcel.processing' | translate }}</span>
+                  }
+              </button>
+
+              <button mat-button color="warn" (click)="reset()" [disabled]="isProcessing">{{ 'convertJsonToExcel.resetButton' | translate }}</button>
+          </div>
+      </div>
+
+  </footer>
+
+</section>

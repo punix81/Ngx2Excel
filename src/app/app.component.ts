@@ -7,13 +7,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import {MatCard, MatCardContent} from "@angular/material/card";
 import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-    imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatCardContent, MatCard, RouterLink],
+    imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, RouterLink],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
