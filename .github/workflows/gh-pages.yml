@@ -17,7 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,27 +27,23 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install
         run: npm ci
 
-      - name: Build (GitHub Pages base href)
+      - name: Build
         run: npx ng build --configuration production --base-href "/Ngx2Excel/"
 
-      # IMPORTANT:
-      # Mets ici le BON chemin de dist.
-      # Le plus fréquent: dist/<project-name> ou dist/<project-name>/browser
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/Ngx2Excel
 
   deploy:
+    runs-on: ubuntu-latest
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-
     steps:
       - name: Deploy
         id: deployment

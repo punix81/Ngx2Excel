@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Ngx2Excel2": {
+    "Ngx2Excel": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/ngx2-excel2",
+            "outputPath": "dist/Ngx2Excel",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
