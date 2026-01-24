@@ -30,10 +30,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'Ngx2Excel2' title`, () => {
+  it(`should have the 'Ngx2Excel' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('Ngx2Excel2');
+    expect(app.title).toEqual('Ngx2Excel');
   });
 
   it('should have a default language', () => {

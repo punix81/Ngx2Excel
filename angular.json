@@ -75,10 +75,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Ngx2Excel2:build:production"
+              "buildTarget": "Ngx2Excel:build:production"
             },
             "development": {
-              "buildTarget": "Ngx2Excel2:build:development"
+              "buildTarget": "Ngx2Excel:build:development"
             }
           },
           "defaultConfiguration": "development"

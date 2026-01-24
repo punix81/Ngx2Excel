@@ -19,7 +19,7 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Ngx2Excel2';
+  title = 'Ngx2Excel';
   currentLang = 'en';
 
   // Version (synchronisée avec package.json)
