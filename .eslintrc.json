@@ -22,6 +22,15 @@
       "files": ["*.html"],
       "extends": ["plugin:@angular-eslint/template/recommended"],
       "rules": {}
+    },
+    {
+      "files": ["**/*.html"],
+      "parser": "@html-eslint/parser",
+      "plugins": ["@html-eslint"],
+      "rules": {
+        "@html-eslint/attr-spacing": "error",
+        "@html-eslint/require-doctype": "error"
+      }
     }
   ]
 }

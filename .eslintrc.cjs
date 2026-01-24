@@ -1,0 +1,35 @@
+module.exports = {
+  ignorePatterns: ["projects/**/*"],
+  overrides: [
+    {
+      files: ["*.ts"],
+      parser: "@typescript-eslint/parser",
+      parserOptions: {
+        project: ["tsconfig.json"],
+        createDefaultProgram: true
+      },
+      plugins: ["@typescript-eslint"],
+      extends: [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
+        "prettier"
+      ],
+      rules: {}
+    },
+    {
+      files: ["*.html"],
+      extends: ["plugin:@angular-eslint/template/recommended"],
+      rules: {}
+    },
+    {
+      files: ["**/*.html"],
+      parser: "@html-eslint/parser",
+      plugins: ["@html-eslint"],
+      rules: {
+        "@html-eslint/attr-spacing": "error",
+        "@html-eslint/require-doctype": "error"
+      }
+    }
+  ]
+};

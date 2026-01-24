@@ -11,7 +11,9 @@
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "lint": "ng lint",
-    "lint:fix": "ng lint --fix"
+    "lint:fix": "ng lint --fix",
+    "lint:html": "eslint --config eslint.config.cjs --ext .html \"src/**/*.html\"",
+    "lint:html:fix": "eslint --config eslint.config.cjs --ext .html \"src/**/*.html\" --fix"
   },
   "private": true,
   "dependencies": {
@@ -41,6 +43,8 @@
     "@angular/cli": "^21.1.1",
     "@angular/compiler-cli": "^21.1.1",
     "@angular/material": "^21.1.1",
+    "@html-eslint/eslint-plugin": "^0.53.0",
+    "@html-eslint/parser": "^0.53.0",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
