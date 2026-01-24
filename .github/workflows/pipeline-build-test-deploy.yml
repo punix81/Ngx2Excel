@@ -57,6 +57,18 @@ jobs:
             fi
           fi
 
+      - name: Sanitize package-lock.json (replace internal registry URLs)
+        working-directory: ${{ steps.find.outputs.proj-dir }}
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "Replacing repo.bit.admin.ch references with registry.npmjs.org in package-lock.json"
+            sed -i 's|https://repo.bit.admin.ch/repository/npm-group|https://registry.npmjs.org|g' package-lock.json || true
+            sed -i 's|http://repo.bit.admin.ch/repository/npm-group|https://registry.npmjs.org|g' package-lock.json || true
+            git --no-pager diff -- package-lock.json | sed -n '1,200p' || true
+          else
+            echo "No package-lock.json to sanitize"
+          fi
+
       - name: Install Dependencies (including dev)
         working-directory: ${{ steps.find.outputs.proj-dir }}
         run: |
