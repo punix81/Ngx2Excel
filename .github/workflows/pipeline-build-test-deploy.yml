@@ -18,18 +18,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      # NOTE: Temporarily disabled actions/cache to avoid using a possibly corrupted npm cache
+      # which can trigger npm internal errors like "Exit handler never called!".
+      # Re-enable this step once installs are stable and verify the cache key.
+      # - name: Cache node modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.npm
+      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Ensure stable npm (workaround for npm internal errors)
+        run: |
+          echo "Current npm version:"; npm -v || true
+          echo "Upgrading npm to v10 (stable) to avoid known CLI internal errors"
+          npm install -g npm@10 || true
+          echo "New npm version:"; npm -v || true
 
       - name: Find project root (where package.json is)
         id: find
@@ -50,15 +60,44 @@ jobs:
       - name: Install Dependencies (including dev)
         working-directory: ${{ steps.find.outputs.proj-dir }}
         run: |
-          set -e
+          set -ex
           echo "Working directory: $(pwd)"
           echo "Node and npm versions:"; node -v; npm -v
-          echo "Installing dependencies (including dev) with verbose output..."
-          npm ci --include=dev --loglevel=verbose
-          echo "npm ci exit code: $?"
-          echo "Listing repo root:"; ls -la | sed -n '1,200p'
-          echo "Listing node_modules (top-level):"; ls -la node_modules | sed -n '1,200p' || true
-          echo "Listing node_modules/.bin:"; ls -la node_modules/.bin | sed -n '1,200p' || true
+
+          # Try npm ci first (fast/clean). If npm has an internal error (Exit handler never called), fallback to npm install.
+          echo "Attempting npm ci --include=dev (verbose)"
+          if npm ci --include=dev --loglevel=verbose; then
+            echo "npm ci succeeded"
+          else
+            echo "npm ci failed. Attempting npm install --include=dev"
+            if npm install --include=dev --loglevel=verbose; then
+              echo "npm install succeeded"
+            else
+              echo "npm install also failed. Clearing npm cache and retrying npm install"
+              npm cache clean --force || true
+              if npm install --include=dev --loglevel=verbose; then
+                echo "npm install after cache clean succeeded"
+              else
+                echo "All npm install attempts failed. Will attempt to install required CLI/test binaries globally as a last resort. See logs above for npm errors."
+                # As a last resort, install the test/build CLIs globally so CI can proceed even if local install broke
+                npm install -g jest @angular/cli || true
+              fi
+            fi
+          fi
+
+          echo "Post-install: listing node_modules and node_modules/.bin"
+          ls -la node_modules | sed -n '1,200p' || true
+          ls -la node_modules/.bin | sed -n '1,200p' || true
+
+          # If local jest/ng are missing, install them globally as last resort (allows tests/build to run)
+          if [ ! -f node_modules/.bin/jest ]; then
+            echo "Local jest missing — installing jest globally as fallback"
+            npm install -g jest || true
+          fi
+          if [ ! -f node_modules/.bin/ng ]; then
+            echo "Local ng missing — installing @angular/cli globally as fallback"
+            npm install -g @angular/cli@^21.1.1 || true
+          fi
 
       - name: Verify installed CLI binaries
         working-directory: ${{ steps.find.outputs.proj-dir }}
@@ -78,17 +117,32 @@ jobs:
         working-directory: ${{ steps.find.outputs.proj-dir }}
         run: |
           set -e
-          echo "Running local jest binary: node_modules/.bin/jest"
-          if [ ! -f node_modules/.bin/jest ]; then
-            echo "ERROR: node_modules/.bin/jest not found"; exit 2
+          echo "Attempt to run tests using local jest if present, else use global jest if available"
+          if [ -x node_modules/.bin/jest ]; then
+            echo "Running local jest"
+            node_modules/.bin/jest --ci --coverage --maxWorkers=2
+          elif command -v jest >/dev/null 2>&1; then
+            echo "Local jest missing, using global jest"
+            jest --ci --coverage --maxWorkers=2
+          else
+            echo "ERROR: jest not found locally or globally"; exit 2
           fi
-          chmod +x node_modules/.bin/jest || true
-          node_modules/.bin/jest --ci --coverage --maxWorkers=2
 
       - name: Build Application
         working-directory: ${{ steps.find.outputs.proj-dir }}
-        # use the project's build script and pass production args
-        run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
+        # use the project's build script and pass production args; support fallback to global ng
+        run: |
+          set -e
+          echo "Attempt to run build using local ng if present, else use global ng if available"
+          if [ -x node_modules/.bin/ng ]; then
+            echo "Running local ng build"
+            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/app/"
+          elif command -v ng >/dev/null 2>&1; then
+            echo "Local ng missing, using global ng"
+            ng build --configuration production --base-href "/Ngx2Excel/app/"
+          else
+            echo "ERROR: ng CLI not found locally or globally"; exit 3
+          fi
 
       - name: List Files in Distribution Directory
         working-directory: ${{ steps.find.outputs.proj-dir }}
@@ -101,4 +155,3 @@ jobs:
           ftp-username: "${{ secrets.CD_FTP_USERNAME }}"
           ftp-password: "${{ secrets.CD_FTP_PASSWORD }}"
           local-dir: "dist/"
-
