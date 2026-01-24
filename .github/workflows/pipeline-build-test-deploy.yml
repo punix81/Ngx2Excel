@@ -31,44 +31,67 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Find project root (where package.json is)
+        id: find
+        run: |
+          set -e
+          if [ -f package.json ]; then
+            echo "proj-dir=." >> $GITHUB_OUTPUT
+          else
+            P=$(find . -maxdepth 4 -name package.json | head -n 1 || true)
+            if [ -n "$P" ]; then
+              D=$(dirname "$P")
+              echo "proj-dir=$D" >> $GITHUB_OUTPUT
+            else
+              echo "proj-dir=." >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Install Dependencies (including dev)
-        run: npm ci --include=dev
+        working-directory: ${{ steps.find.outputs.proj-dir }}
+        run: |
+          set -e
+          echo "Working directory: $(pwd)"
+          echo "Node and npm versions:"; node -v; npm -v
+          echo "Installing dependencies (including dev) with verbose output..."
+          npm ci --include=dev --loglevel=verbose
+          echo "npm ci exit code: $?"
+          echo "Listing repo root:"; ls -la | sed -n '1,200p'
+          echo "Listing node_modules (top-level):"; ls -la node_modules | sed -n '1,200p' || true
+          echo "Listing node_modules/.bin:"; ls -la node_modules/.bin | sed -n '1,200p' || true
 
       - name: Verify installed CLI binaries
+        working-directory: ${{ steps.find.outputs.proj-dir }}
         run: |
           echo "node version: $(node -v)"
           echo "npm version: $(npm -v)"
           echo "Listing node_modules/.bin (first 200 entries):"
           ls -la node_modules/.bin | sed -n '1,200p' || true
-          echo "jest binary present?"; test -x node_modules/.bin/jest && echo "jest ok" || echo "jest missing"
-          echo "ng binary present?"; test -x node_modules/.bin/ng && echo "ng ok" || echo "ng missing"
+          echo "jest binary present?"; test -f node_modules/.bin/jest && echo "jest file exists" || echo "jest missing"
+          echo "jest is executable?"; test -x node_modules/.bin/jest && echo "jest executable" || echo "jest not executable"
+          echo "ng binary present?"; test -f node_modules/.bin/ng && echo "ng file exists" || echo "ng missing"
+          echo "ng is executable?"; test -x node_modules/.bin/ng && echo "ng executable" || echo "ng not executable"
           echo "jest version (if present):"; node_modules/.bin/jest --version || true
           echo "ng version (if present):"; node_modules/.bin/ng --version || true
 
       - name: Run Unit Tests
-        # prefer calling the local jest binary directly to avoid PATH issues
+        working-directory: ${{ steps.find.outputs.proj-dir }}
         run: |
-          if [ -x node_modules/.bin/jest ]; then
-            node_modules/.bin/jest --ci --coverage --maxWorkers=2
-          else
-            npm run test:ci
+          set -e
+          echo "Running local jest binary: node_modules/.bin/jest"
+          if [ ! -f node_modules/.bin/jest ]; then
+            echo "ERROR: node_modules/.bin/jest not found"; exit 2
           fi
-
-      - name: Run codacy-coverage-reporter
-        uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_CODE_COVERAGE_TOKEN }}
-          coverage-reports: coverage/lcov.info
-
-      - name: Clean Distribution Directory
-        # project doesn't have ci:clean script; remove dist folder directly
-        run: rm -rf dist || true
+          chmod +x node_modules/.bin/jest || true
+          node_modules/.bin/jest --ci --coverage --maxWorkers=2
 
       - name: Build Application
+        working-directory: ${{ steps.find.outputs.proj-dir }}
         # use the project's build script and pass production args
         run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
 
       - name: List Files in Distribution Directory
+        working-directory: ${{ steps.find.outputs.proj-dir }}
         run: ls -R ./dist || true
 
       - name: FTP Deploy
@@ -78,3 +101,4 @@ jobs:
           ftp-username: "${{ secrets.CD_FTP_USERNAME }}"
           ftp-password: "${{ secrets.CD_FTP_PASSWORD }}"
           local-dir: "dist/"
+
