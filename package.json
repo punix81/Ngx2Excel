@@ -5,6 +5,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
+    "prebuild": "node -e \"const [major,minor]=process.versions.node.split('.').map(n=>parseInt(n)); if(major<20 || (major===20 && minor<19)){console.error('ERROR: Node.js >=20.19.0 is required. Current: '+process.version); process.exit(3);} else {console.log('Node version OK: '+process.version);}\"",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
