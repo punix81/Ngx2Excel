@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   pages: write
 
 jobs:
@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,7 +35,17 @@ jobs:
       - name: Build
         run: npm run build -- --configuration production --base-href "/Ngx2Excel/app/"
 
-      - name: Deploy to GitHub Pages
+      # If a personal access token secret GH_PAGES_TOKEN is provided, use it (useful when GITHUB_TOKEN lacks push rights)
+      - name: Deploy to GitHub Pages (using GH_PAGES_TOKEN)
+        if: secrets.GH_PAGES_TOKEN != ''
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GH_PAGES_TOKEN }}
+          publish_dir: ./dist/ngx2-excel2
+
+      # Otherwise fall back to the default GITHUB_TOKEN
+      - name: Deploy to GitHub Pages (using GITHUB_TOKEN)
+        if: secrets.GH_PAGES_TOKEN == ''
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
