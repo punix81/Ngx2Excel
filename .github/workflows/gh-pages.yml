@@ -1,67 +1,55 @@
-name: Deploy to GitHub Pages
+name: Deploy Angular to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
-      - name: Setup Node.js
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+          cache: npm
 
-      - name: Ensure stable npm
-        run: |
-          npm install -g npm@10 || true
-          npm -v || true
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Find project root
-        id: find
-        run: |
-          if [ -f package.json ]; then
-            echo "proj-dir=." >> $GITHUB_OUTPUT
-          else
-            P=$(find . -maxdepth 4 -name package.json | head -n 1 || true)
-            if [ -n "$P" ]; then
-              D=$(dirname "$P")
-              echo "proj-dir=$D" >> $GITHUB_OUTPUT
-            else
-              echo "proj-dir=." >> $GITHUB_OUTPUT
-            fi
-          fi
+      - name: Build (GitHub Pages base href)
+        run: npx ng build --configuration production --base-href "/Ngx2Excel/"
 
-      - name: Install dependencies (including dev)
-        working-directory: ${{ steps.find.outputs.proj-dir }}
-        run: |
-          npm ci --include=dev --loglevel=verbose || npm install --include=dev --loglevel=verbose
-          ls -la node_modules/.bin || true
-
-      - name: Build
-        working-directory: ${{ steps.find.outputs.proj-dir }}
-        run: |
-          if [ -x node_modules/.bin/ng ]; then
-            node_modules/.bin/ng build --configuration production --base-href "/Ngx2Excel/app/"
-          elif command -v ng >/dev/null 2>&1; then
-            ng build --configuration production --base-href "/Ngx2Excel/app/"
-          else
-            echo "ERROR: ng not found"; exit 1
-          fi
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      # IMPORTANT:
+      # Mets ici le BON chemin de dist.
+      # Le plus fréquent: dist/<project-name> ou dist/<project-name>/browser
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/ngx2-excel2
+          path: dist/Ngx2Excel
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
