@@ -30,11 +30,15 @@ jobs:
       - name: Install
         run: npm ci
 
-      # ✅ LINT (bloquant)
+      # ✅ LINT
       - name: Lint
         run: npm run lint
 
-      # 🔢 Injection de la version
+      # 🧪 TESTS JEST (bloquant)
+      - name: Run Jest tests
+        run: npm run test:ci
+
+      # 🔢 Injection de version
       - name: Inject app version
         run: |
           VERSION=$(node -p "require('./package.json').version")
