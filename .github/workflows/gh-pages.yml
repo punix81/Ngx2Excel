@@ -20,17 +20,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - name: Install
         run: npm ci
+
+      # ✅ LINT
       - name: Lint
         run: npm run lint
+
+      # 🧪 TESTS JEST (bloquant)
       - name: Run Jest tests
         run: npm run test:ci
+
+      # 🔢 Injection de version
       - name: Inject app version
         run: |
           VERSION=$(node -p "require('./package.json').version")
