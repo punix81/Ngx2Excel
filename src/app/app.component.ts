@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import {RouterLink, RouterOutlet} from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { ConvertJsonToExcelComponent } from './convert-json-to-excel/convert-json-to-excel.component';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 
@@ -12,7 +12,7 @@ import { environment } from '../environments/environment';
 @Component({
   selector: 'app-root',
   standalone: true,
-    imports: [RouterOutlet, ConvertJsonToExcelComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, RouterLink],
+    imports: [RouterModule, ConvertJsonToExcelComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
