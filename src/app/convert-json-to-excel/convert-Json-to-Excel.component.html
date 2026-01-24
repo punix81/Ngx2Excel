@@ -18,9 +18,18 @@
         (change)="onFileSelected($event)"
         />
 
-      <button mat-stroked-button color="primary" (click)="fileInput.click()" aria-label="{{ 'convertJsonToExcel.chooseFiles' | translate }}">
-        {{ 'convertJsonToExcel.chooseFiles' | translate }}
-      </button>
+      <div class="drop-zone"
+           [class.dragging]="isDragging"
+           (click)="fileInput.click()"
+           (dragover)="$event.preventDefault(); onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="$event.preventDefault(); onDrop($event)">
+        <div class="drop-zone-content">
+          <mat-icon>upload</mat-icon>
+          <div class="drop-text">{{ 'convertJsonToExcel.dragDrop' | translate }}</div>
+          <div class="or-text">{{ 'convertJsonToExcel.orClick' | translate }}</div>
+        </div>
+      </div>
 
       <mat-form-field appearance="outline" class="format-field">
         <mat-label>{{ 'convertJsonToExcel.outputFormat' | translate }}</mat-label>

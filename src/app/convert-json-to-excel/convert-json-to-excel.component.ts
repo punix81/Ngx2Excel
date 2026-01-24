@@ -36,6 +36,9 @@ export class ConvertJsonToExcelComponent {
 
   public readonly convertService = inject(ConvertJsonToExcelService);
 
+  // Drag state
+  isDragging = false;
+
   constructor() {
     effect(() => {
       const res = this.convertService.result();
@@ -77,6 +80,31 @@ export class ConvertJsonToExcelComponent {
       this.dataSource.data = this.selectedFiles;
       setTimeout(() => this.table?.renderRows());
     }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false;
+    const dt = event.dataTransfer;
+    if (!dt) return;
+    const files = dt.files;
+    if (!files || files.length === 0) return;
+
+    // convert FileList to array and reuse logic
+    this.selectedFiles = Array.from(files);
+    this.convertService.clearResult();
+    this.dataSource.data = this.selectedFiles;
+    setTimeout(() => this.table?.renderRows());
   }
 
   removeFile(file: File): void {

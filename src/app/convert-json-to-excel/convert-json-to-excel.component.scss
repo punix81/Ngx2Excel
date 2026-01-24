@@ -90,6 +90,41 @@
   color: rgba(0, 0, 0, 0.7);
 }
 
+.drop-zone {
+  flex: 1 1 auto;
+  min-height: 88px;
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 12px;
+  transition: background-color 160ms, border-color 160ms;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.drop-zone.dragging {
+  border-color: #3f51b5;
+  background: rgba(63, 81, 181, 0.06);
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.drop-text {
+  font-weight: 600;
+}
+
+.or-text {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
 @media (max-width: 600px) {
   .controls {
     gap: 8px;
