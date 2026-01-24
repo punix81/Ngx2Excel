@@ -8,11 +8,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-convert-json-to-excel',
   standalone: true,
   imports: [
+    CommonModule,
     TranslateModule,
     MatTableModule,
     MatFormFieldModule,
@@ -112,5 +114,12 @@ export class ConvertJsonToExcelComponent {
     this.convertService.clearResult();
     this.dataSource.data = this.selectedFiles;
     setTimeout(() => this.table?.renderRows());
+  }
+
+  onReset(): void {
+    // safety log to help debug UI clicks
+    // eslint-disable-next-line no-console
+    console.log('onReset clicked — selectedFiles before reset:', this.selectedFiles.length);
+    this.reset();
   }
 }
