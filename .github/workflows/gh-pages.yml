@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -38,12 +40,20 @@ jobs:
       - name: Run Jest tests
         run: npm run test:ci
 
-      # 🔢 Injection de version
+      # 🔼 Bump patch version (commit + tag pushed). Uses [skip ci] to avoid triggering another workflow.
+      - name: Bump patch version and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          npm version patch -m "chore(release): %s [skip ci]"
+          git push origin HEAD:main --follow-tags
+
+      # 🔢 Injection de version (read version from package.json after bump)
       - name: Inject app version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Building version $VERSION"
-          sed -i "s/__APP_VERSION__/$VERSION/g" src/environments/environment*.ts
+          node scripts/inject-version.js
 
       # 🏗 Build Angular
       - name: Build
