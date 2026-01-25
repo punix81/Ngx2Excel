@@ -1,4 +1,4 @@
-<section class="convert-card" appearance="outlined">
+<section class="convert-card">
   <header>
     <h2 class="card-title">Extract CSV → JSON (per column)</h2>
     <p class="card-subtitle">Select one or more CSV files, choose the key column and columns to export.</p>
@@ -19,10 +19,12 @@
       />
 
       <div class="drop-zone"
-           [class.dragging]="isDragging"
+           [ngClass]="{ 'dragging': isDragging }"
            (click)="fileInput.click()"
+           (dragenter)="$event.preventDefault(); onDragOver($event)"
            (dragover)="$event.preventDefault(); onDragOver($event)"
            (dragleave)="$event.preventDefault(); onDragLeave($event)"
+           (dragend)="$event.preventDefault(); onDragLeave($event)"
            (drop)="$event.preventDefault(); onDrop($event)">
         <div class="drop-zone-content">
           <mat-icon>upload</mat-icon>
