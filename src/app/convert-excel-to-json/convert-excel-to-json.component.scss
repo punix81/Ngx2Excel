@@ -1,0 +1,11 @@
+/* Minimal styles for convert-excel-to-json component */
+.convert-csv {
+  padding: 12px;
+}
+.convert-csv h3 {
+  margin: 0 0 8px 0;
+}
+.convert-csv input[type="file"] {
+  display: block;
+  margin-bottom: 8px;
+}

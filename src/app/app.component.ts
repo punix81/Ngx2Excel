@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ConvertJsonToExcelComponent } from './convert-json-to-excel/convert-json-to-excel.component';
+import { ConvertExcelToJsonComponent } from './convert-excel-to-json/convert-excel-to-json.component';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -12,7 +13,7 @@ import { environment } from '../environments/environment';
 @Component({
   selector: 'app-root',
   standalone: true,
-    imports: [RouterModule, ConvertJsonToExcelComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule],
+    imports: [RouterModule, ConvertJsonToExcelComponent, ConvertExcelToJsonComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

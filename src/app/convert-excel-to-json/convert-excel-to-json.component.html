@@ -1,0 +1,104 @@
+<section class="convert-card" appearance="outlined">
+  <header>
+    <h2 class="card-title">Extract CSV → JSON (per column)</h2>
+    <p class="card-subtitle">Select one or more CSV files, choose the key column and columns to export.</p>
+  </header>
+
+  <div class="card-content">
+    <p class="lead">Upload your CSV files. The first row is treated as header. For each selected column we'll produce a JSON of key:value pairs.</p>
+
+    <div class="controls">
+      <input
+        #fileInput
+        id="csvFileInput"
+        type="file"
+        accept=".csv,text/csv"
+        multiple
+        hidden
+        (change)="onFilesChange($event)"
+      />
+
+      <div class="drop-zone"
+           [class.dragging]="isDragging"
+           (click)="fileInput.click()"
+           (dragover)="$event.preventDefault(); onDragOver($event)"
+           (dragleave)="$event.preventDefault(); onDragLeave($event)"
+           (drop)="$event.preventDefault(); onDrop($event)">
+        <div class="drop-zone-content">
+          <mat-icon>upload</mat-icon>
+          <div class="drop-text">Drag & drop CSV files here</div>
+          <div class="or-text">or click to select files</div>
+        </div>
+      </div>
+
+      <div class="format-field" style="margin-left:16px;">
+        <button mat-flat-button color="primary" (click)="parseAll()" [disabled]="isProcessing || files.length === 0">Parse</button>
+      </div>
+    </div>
+
+    <section *ngIf="files.length > 0" class="files">
+      <h3 class="files-title">Selected Files ({{ files.length }})</h3>
+      <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 file-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>File</th>
+          <td mat-cell *matCellDef="let file">{{ file.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="size">
+          <th mat-header-cell *matHeaderCellDef>Size</th>
+          <td mat-cell *matCellDef="let file">{{ formatSize(file.size) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let file">
+            <button mat-icon-button aria-label="Remove" (click)="removeFile(file)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <div *ngFor="let fn of filenameList" class="file-config">
+        <h4>{{ fn }}</h4>
+        <div *ngIf="headersMap[fn] && headersMap[fn].length">
+          <mat-form-field appearance="outline">
+            <mat-label>Key column</mat-label>
+            <mat-select [(ngModel)]="keyColMap[fn]">
+              <mat-option *ngFor="let h of headersMap[fn]" [value]="h">{{ h }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div style="margin-top:8px">Columns to export:</div>
+          <div *ngFor="let h of headersMap[fn]" style="display:inline-block;margin-right:8px;">
+            <ng-container *ngIf="h !== keyColMap[fn]">
+              <mat-checkbox [checked]="selectedColsMap[fn]?.has(h)" (change)="toggleCol(fn,h)">{{ h }}</mat-checkbox>
+            </ng-container>
+          </div>
+          <div style="margin-top:8px;">
+            <button mat-flat-button color="accent" (click)="exportSelected(fn)">Export selected as JSON</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <div *ngIf="isProcessing" class="overlay">
+      <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
+      <div class="overlay-text">Parsing CSV files...</div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <small>Tip: CSV header is used to detect columns.</small>
+
+    <div class="controls">
+      <div class="action-buttons">
+        <button *ngIf="files.length > 0" type="button" mat-button color="warn" (click)="onReset()" [disabled]="isProcessing">Reset</button>
+      </div>
+    </div>
+
+  </footer>
+
+</section>
