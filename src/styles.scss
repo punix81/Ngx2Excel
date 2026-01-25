@@ -1,2 +1,8 @@
-@use './material-theme' as *;
 @use './styles-legacy' as *;
+
+/* Force toolbar background in case theme variables are not loaded */
+.mat-toolbar.mat-primary,
+.app-toolbar {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+}
