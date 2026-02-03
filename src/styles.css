@@ -12,6 +12,20 @@
   --muted: rgba(255,255,255,0.6);
 }
 
+/* Reset CSS - Enlever tous les margins/paddings par défaut */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);

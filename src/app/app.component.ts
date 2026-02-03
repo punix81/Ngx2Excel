@@ -15,7 +15,7 @@ import { environment } from '../environments/environment';
   standalone: true,
     imports: [RouterModule, ConvertJsonToExcelComponent, ConvertExcelToJsonComponent, TranslateModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'Ngx2Excel';
