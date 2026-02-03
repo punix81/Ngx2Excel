@@ -19,11 +19,11 @@
         />
 
       <div class="drop-zone"
-           [class.dragging]="isDragging"
-           (click)="fileInput.click()"
-           (dragover)="$event.preventDefault(); onDragOver($event)"
-           (dragleave)="onDragLeave($event)"
-           (drop)="$event.preventDefault(); onDrop($event)">
+        [class.dragging]="isDragging"
+        (click)="fileInput.click()"
+        (dragover)="$event.preventDefault(); onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="$event.preventDefault(); onDrop($event)">
         <div class="drop-zone-content">
           <mat-icon>upload</mat-icon>
           <div class="drop-text">{{ 'convertJsonToExcel.dragDrop' | translate }}</div>
@@ -40,47 +40,51 @@
       </mat-form-field>
     </div>
 
-    <section *ngIf="selectedFiles.length > 0" class="files">
-      <h3 class="files-title">{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }})</h3>
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 file-table" aria-label="{{ 'convertJsonToExcel.selectedFiles' | translate }}">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.fileName' | translate }}</th>
-          <td mat-cell *matCellDef="let file">{{ file.name }}</td>
-        </ng-container>
-        <ng-container matColumnDef="size">
-          <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.size' | translate }}</th>
-          <td mat-cell *matCellDef="let file">{{ formatSize(file.size) }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.actions' | translate }}</th>
-          <td mat-cell *matCellDef="let file">
-            <button mat-icon-button aria-label="{{ 'convertJsonToExcel.remove' | translate }}" (click)="removeFile(file)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" [attr.data-file-name]="row?.name"></tr>
-      </table>
-    </section>
+    @if (selectedFiles.length > 0) {
+      <section class="files">
+        <h3 class="files-title">{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }})</h3>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 file-table" aria-label="{{ 'convertJsonToExcel.selectedFiles' | translate }}">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.fileName' | translate }}</th>
+            <td mat-cell *matCellDef="let file">{{ file.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="size">
+            <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.size' | translate }}</th>
+            <td mat-cell *matCellDef="let file">{{ formatSize(file.size) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.actions' | translate }}</th>
+            <td mat-cell *matCellDef="let file">
+              <button mat-icon-button aria-label="{{ 'convertJsonToExcel.remove' | translate }}" (click)="removeFile(file)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" [attr.data-file-name]="row?.name"></tr>
+        </table>
+      </section>
+    }
     <ng-template #noFiles>
       <div class="no-files">
         <div class="no-files-card">{{ 'convertJsonToExcel.noFilesSelected' | translate }}</div>
       </div>
     </ng-template>
 
-    <ng-container *ngIf="errorMessage">
+    @if (errorMessage) {
       <div class="message error">{{ errorMessage }}</div>
-    </ng-container>
+    }
 
-    <ng-container *ngIf="serviceSuccessMessage || successMessage">
+    @if (serviceSuccessMessage || successMessage) {
       <div class="message success">{{ serviceSuccessMessage || successMessage }}</div>
-    </ng-container>
+    }
 
-    <div *ngIf="isProcessing" class="overlay">
-      <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
-      <div class="overlay-text">{{ 'convertJsonToExcel.processing' | translate }}</div>
-    </div>
+    @if (isProcessing) {
+      <div class="overlay">
+        <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
+        <div class="overlay-text">{{ 'convertJsonToExcel.processing' | translate }}</div>
+      </div>
+    }
 
   </div>
 
@@ -94,17 +98,23 @@
           color="accent"
           (click)="convertFiles()"
           [disabled]="isProcessing || selectedFiles.length === 0"
-        >
-          <span *ngIf="!isProcessing">{{ 'convertJsonToExcel.convertButton' | translate }}</span>
-          <span *ngIf="isProcessing"><mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+          >
+          @if (!isProcessing) {
+            <span>{{ 'convertJsonToExcel.convertButton' | translate }}</span>
+          }
+          @if (isProcessing) {
+            <span><mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
             <span class="processing-text">{{ 'convertJsonToExcel.processing' | translate }}</span>
           </span>
-        </button>
+        }
+      </button>
 
-        <button *ngIf="selectedFiles.length > 0" type="button" mat-button color="warn" (click)="onReset()" [disabled]="isProcessing">{{ 'convertJsonToExcel.resetButton' | translate }}</button>
-      </div>
+      @if (selectedFiles.length > 0) {
+        <button type="button" mat-button color="warn" (click)="onReset()" [disabled]="isProcessing">{{ 'convertJsonToExcel.resetButton' | translate }}</button>
+      }
     </div>
+  </div>
 
-  </footer>
+</footer>
 
 </section>
