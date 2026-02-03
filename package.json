@@ -1,6 +1,6 @@
 {
   "name": "ngx2-excel",
-  "version": "0.0.460",
+  "version": "0.0.461",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
