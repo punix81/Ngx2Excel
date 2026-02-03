@@ -1,6 +1,7 @@
 {
   "app.title": "Ngx2Excel - JSON & Excel Converter",
   "app.subtitle": "Convert your files easily",
+  "app.desription": "Ngx2Excel is an Angular application that allows you to convert files between Excel (XLSX/CSV) and JSON through a simple and responsive web interface. The project includes two main features: extracting data from Excel files to JSON, and generating Excel files from JSON, with support for drag‑and‑drop and output format options.",
   "routes.admin.translation.convertExcel": "Convert Excel to JSON",
   "routes.admin.translation.convertJson": "Convert JSON to Excel",
   "convertExcelToJson.title": "Convert Excel to JSON",
@@ -33,6 +34,9 @@
   "common.language": "Language",
   "common.english": "English",
   "common.french": "French",
+  "common.german": "German",
+  "common.italian": "Italian",
+  "common.portuguese": "Portuguese",
   "common.close": "Close",
   "common.cancel": "Cancel",
   "common.save": "Save",

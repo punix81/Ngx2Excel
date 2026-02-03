@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class TranslationService {
   private readonly STORAGE_KEY = 'app-language';
   private readonly DEFAULT_LANG = 'en';
-  private readonly AVAILABLE_LANGS = ['en', 'fr'];
+  private readonly AVAILABLE_LANGS = ['en', 'fr', 'de', 'it', 'pt'];
 
   private readonly translate = inject(TranslateService);
 

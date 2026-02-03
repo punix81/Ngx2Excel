@@ -28,10 +28,10 @@ export class AppComponent {
   private readonly translate = inject(TranslateService);
 
   constructor() {
-    this.translate.addLangs(['en', 'fr']);
+    this.translate.addLangs(['en', 'fr', 'de', 'it', 'pt']);
     this.translate.setDefaultLang('en');
     const browserLang = this.translate.getBrowserLang();
-    const langToUse = browserLang?.match(/en|fr/) ? browserLang : 'en';
+    const langToUse = browserLang?.match(/en|fr|de|it|pt/) ? browserLang : 'en';
     this.translate.use(langToUse);
     this.currentLang = langToUse;
   }

@@ -18,6 +18,9 @@
                 <mat-menu #langMenu="matMenu">
                     <button mat-menu-item (click)="switchLanguage('en')">English</button>
                     <button mat-menu-item (click)="switchLanguage('fr')">Français</button>
+                    <button mat-menu-item (click)="switchLanguage('de')">Deutsch</button>
+                    <button mat-menu-item (click)="switchLanguage('it')">Italiano</button>
+                    <button mat-menu-item (click)="switchLanguage('pt')">Português</button>
                 </mat-menu>
             </div>
         </mat-toolbar>
@@ -26,9 +29,8 @@
     <main class="app-main" role="main">
         <section class="page">
             <header class="page-header">
-                <h1 class="page-title">Convert JSON → Excel</h1>
                 <p class="page-subtitle">
-                    {{ 'app.desription' | translate }}
+                    {{ 'app.description' | translate }}
                 </p>
             </header>
             <div class="page-card" appearance="outlined">
