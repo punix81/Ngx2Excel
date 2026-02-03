@@ -1,5 +1,6 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { ConvertedJsonToExcelFile } from './converted-json-to-excel-file';
+import * as ExcelJS from 'exceljs';
 
 @Injectable({
   providedIn: 'root'
@@ -39,17 +40,19 @@ export class ConvertJsonToExcelService {
           filesProcessed++;
 
           if (filesProcessed === files.length) {
-            try {
-              const result = this.createTranslationTable(filesData, outputFormat);
-              this.result.set(result);
-              this.success.set(`Fichier ${outputFormat.toUpperCase()} généré avec succès!`);
-            } catch (err) {
-              const errorMessage = err instanceof Error ? err.message : String(err);
-              this.error.set(`Erreur lors de la génération du fichier: ${errorMessage}`);
-              this.result.set(null);
-            } finally {
-              this.isProcessing.set(false);
-            }
+            this.createTranslationTable(filesData, outputFormat)
+              .then(result => {
+                this.result.set(result);
+                this.success.set(`Fichier ${outputFormat.toUpperCase()} généré avec succès!`);
+              })
+              .catch(err => {
+                const errorMessage = err instanceof Error ? err.message : String(err);
+                this.error.set(`Erreur lors de la génération du fichier: ${errorMessage}`);
+                this.result.set(null);
+              })
+              .finally(() => {
+                this.isProcessing.set(false);
+              });
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
@@ -82,7 +85,7 @@ export class ConvertJsonToExcelService {
     window.URL.revokeObjectURL(url);
   }
 
-  private createTranslationTable(filesData: Map<string, unknown>, format: 'xlsx' | 'csv'): ConvertedJsonToExcelFile {
+  private async createTranslationTable(filesData: Map<string, unknown>, format: 'xlsx' | 'csv'): Promise<ConvertedJsonToExcelFile> {
     const allKeys = new Set<string>();
     const flattenedFiles = new Map<string, Map<string, string>>();
 
@@ -119,11 +122,12 @@ export class ConvertJsonToExcelService {
       blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       fileExtension = 'csv';
     } else {
-      const excelContent = this.generateExcelXML(headers, tableData);
-      blob = new Blob([excelContent], {
-        type: 'application/vnd.ms-excel;charset=utf-8;'
+      // Générer un vrai fichier .xlsx avec ExcelJS
+      const buffer = await this.generateExcelWithExcelJS(headers, tableData);
+      blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
-      fileExtension = 'xls';
+      fileExtension = 'xlsx';
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -157,46 +161,50 @@ export class ConvertJsonToExcelService {
     return [headerLine, ...dataLines].join('\n');
   }
 
-  private generateExcelXML(headers: string[], data: Record<string, string | undefined>[]): string {
-    const escapeXML = (value: string | undefined): string => {
-      if (value === null || value === undefined) {
-        return '';
-      }
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
+  private async generateExcelWithExcelJS(headers: string[], data: Record<string, string | undefined>[]): Promise<ArrayBuffer> {
+    // Créer un nouveau workbook
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Ngx2Excel';
+    workbook.created = new Date();
+
+    // Ajouter une feuille
+    const worksheet = workbook.addWorksheet('Translations');
+
+    // Ajouter les en-têtes avec style
+    const headerRow = worksheet.addRow(headers);
+    headerRow.font = { bold: true, size: 12 };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD3D3D3' }
     };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'left' };
 
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<?mso-application progid="Excel.Sheet"?>\n';
-    xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
-    xml += ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n';
-    xml += '<Worksheet ss:Name="Translations">\n';
-    xml += '<Table>\n';
-
-    xml += '<Row>\n';
-    headers.forEach(header => {
-      xml += `<Cell><Data ss:Type="String">${escapeXML(header)}</Data></Cell>\n`;
-    });
-    xml += '</Row>\n';
-
+    // Ajouter les données
     data.forEach(row => {
-      xml += '<Row>\n';
-      headers.forEach(header => {
-        const value = row[header];
-        xml += `<Cell><Data ss:Type="String">${escapeXML(value)}</Data></Cell>\n`;
-      });
-      xml += '</Row>\n';
+      const rowValues = headers.map(header => row[header] || '');
+      worksheet.addRow(rowValues);
     });
 
-    xml += '</Table>\n';
-    xml += '</Worksheet>\n';
-    xml += '</Workbook>';
+    // Ajuster automatiquement la largeur des colonnes
+    worksheet.columns.forEach((column, index) => {
+      let maxLength = headers[index].length;
+      data.forEach(row => {
+        const value = row[headers[index]];
+        if (value) {
+          const length = String(value).length;
+          if (length > maxLength) {
+            maxLength = length;
+          }
+        }
+      });
+      // Limiter la largeur maximale à 50 caractères
+      column.width = Math.min(maxLength + 2, 50);
+    });
 
-    return xml;
+    // Générer le buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer as ArrayBuffer;
   }
 
   private flattenJson(data: Record<string, unknown>, prefix: string = ''): Map<string, string> {
