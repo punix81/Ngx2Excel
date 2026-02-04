@@ -190,7 +190,9 @@ export class ConvertExcelToJsonComponent {
       const blob = new Blob([JSON.stringify(jsons[col], null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `${this.sanitizeFilename(fileName)}_${this.sanitizeFilename(col)}.json`;
+      // Use column name directly as filename, add .json extension only once
+      const cleanColName = col.replace(/\.json$/i, '');
+      a.download = `${cleanColName}.json`;
       a.click();
       URL.revokeObjectURL(a.href);
     }
