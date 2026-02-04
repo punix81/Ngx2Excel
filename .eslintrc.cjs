@@ -1,8 +1,10 @@
 module.exports = {
-  ignorePatterns: ["projects/**/*"],
+  // Ignore other projects but allow the ngx2excel project explicitly
+  ignorePatterns: ["projects/**/*", "!projects/ngx2excel/**"],
   overrides: [
     {
-      files: ["*.ts"],
+      // Apply to all TypeScript files in the repo
+      files: ["**/*.ts"],
       parser: "@typescript-eslint/parser",
       parserOptions: {
         project: ["tsconfig.json"],

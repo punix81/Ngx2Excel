@@ -1,11 +1,11 @@
 <section class="convert-card" appearance="outlined">
   <header>
-    <h2 class="card-title">{{ 'convertJsonToExcel.title' | translate }}</h2>
-    <p class="card-subtitle">{{ 'convertJsonToExcel.subtitle' | translate }}</p>
+    <h2 class="card-title">Merge JSON → Excel/CSV</h2>
+    <p class="card-subtitle">Merge multiple JSON translation files into a single spreadsheet.</p>
   </header>
 
   <div class="card-content">
-    <p class="lead">{{ 'convertJsonToExcel.description' | translate }}</p>
+    <p class="lead">Upload your JSON files. They will be merged into a single Excel or CSV file with keys and values for each language.</p>
 
     <div class="controls">
       <input
@@ -26,36 +26,36 @@
         (drop)="$event.preventDefault(); onDrop($event)">
         <div class="drop-zone-content">
           <mat-icon>upload</mat-icon>
-          <div class="drop-text">{{ 'convertJsonToExcel.dragDrop' | translate }}</div>
-          <div class="or-text">{{ 'convertJsonToExcel.orClick' | translate }}</div>
+          <div class="drop-text">Drag & drop JSON files here</div>
+          <div class="or-text">or click to select files</div>
         </div>
       </div>
 
       <mat-form-field appearance="outline" class="format-field">
-        <mat-label>{{ 'convertJsonToExcel.outputFormat' | translate }}</mat-label>
+        <mat-label>Output Format</mat-label>
         <mat-select [value]="outputFormat" (selectionChange)="onFormatChange($any($event))">
-          <mat-option value="xlsx">{{ 'convertJsonToExcel.excel' | translate }}</mat-option>
-          <mat-option value="csv">{{ 'convertJsonToExcel.csv' | translate }}</mat-option>
+          <mat-option value="xlsx">Excel (.xlsx)</mat-option>
+          <mat-option value="csv">CSV (.csv)</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
 
     @if (selectedFiles.length > 0) {
       <section class="files">
-        <h3 class="files-title">{{ 'convertJsonToExcel.selectedFiles' | translate }} ({{ selectedFiles.length }})</h3>
-        <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 file-table" aria-label="{{ 'convertJsonToExcel.selectedFiles' | translate }}">
+        <h3 class="files-title">Selected Files ({{ selectedFiles.length }})</h3>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 file-table" aria-label="Selected files">
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.fileName' | translate }}</th>
+            <th mat-header-cell *matHeaderCellDef>File Name</th>
             <td mat-cell *matCellDef="let file">{{ file.name }}</td>
           </ng-container>
           <ng-container matColumnDef="size">
-            <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.size' | translate }}</th>
+            <th mat-header-cell *matHeaderCellDef>Size</th>
             <td mat-cell *matCellDef="let file">{{ formatSize(file.size) }}</td>
           </ng-container>
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>{{ 'convertJsonToExcel.actions' | translate }}</th>
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
             <td mat-cell *matCellDef="let file">
-              <button mat-icon-button aria-label="{{ 'convertJsonToExcel.remove' | translate }}" (click)="removeFile(file)">
+              <button mat-icon-button aria-label="Remove" (click)="removeFile(file)">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -65,11 +65,6 @@
         </table>
       </section>
     }
-    <ng-template #noFiles>
-      <div class="no-files">
-        <div class="no-files-card">{{ 'convertJsonToExcel.noFilesSelected' | translate }}</div>
-      </div>
-    </ng-template>
 
     @if (errorMessage) {
       <div class="message error">{{ errorMessage }}</div>
@@ -82,7 +77,7 @@
     @if (isProcessing) {
       <div class="overlay">
         <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
-        <div class="overlay-text">{{ 'convertJsonToExcel.processing' | translate }}</div>
+        <div class="overlay-text">Processing files...</div>
       </div>
     }
 
@@ -98,21 +93,22 @@
           [disabled]="isProcessing || selectedFiles.length === 0"
           >
           @if (!isProcessing) {
-            <span>{{ 'convertJsonToExcel.convertButton' | translate }}</span>
+            <span>Convert to {{ outputFormat | uppercase }}</span>
           }
           @if (isProcessing) {
-            <span><mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
-            <span class="processing-text">{{ 'convertJsonToExcel.processing' | translate }}</span>
-          </span>
+            <span>
+              <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+              <span class="processing-text">Processing...</span>
+            </span>
+          }
+        </button>
+
+        @if (selectedFiles.length > 0) {
+          <button type="button" mat-button color="warn" (click)="onReset()" [disabled]="isProcessing">Reset</button>
         }
-      </button>
-
-      @if (selectedFiles.length > 0) {
-        <button type="button" mat-button color="warn" (click)="onReset()" [disabled]="isProcessing">{{ 'convertJsonToExcel.resetButton' | translate }}</button>
-      }
+      </div>
     </div>
-  </div>
 
-</footer>
+  </footer>
 
 </section>

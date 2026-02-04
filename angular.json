@@ -136,6 +136,48 @@
           }
         }
       }
+    },
+    "ngx2excel": {
+      "projectType": "library",
+      "root": "projects/ngx2excel",
+      "sourceRoot": "projects/ngx2excel/src",
+      "prefix": "ngx2excel",
+      "architect": {
+        "build": {
+          "builder": "ng-packagr:build",
+          "options": {
+            "project": "projects/ngx2excel/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/ngx2excel/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/ngx2excel/src/favicon.ico",
+              "projects/ngx2excel/src/assets"
+            ],
+            "styles": [
+              "projects/ngx2excel/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngx2excel/**/*.ts"
+            ]
+          }
+        }
+      }
     }
   }
 }
+
