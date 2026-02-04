@@ -1,18 +1,18 @@
 <section class="convert-card">
   <header>
-    <h2 class="card-title">Extract CSV/Excel → JSON (per column)</h2>
-    <p class="card-subtitle">Select one or more CSV or Excel files, choose the key column and columns to export.</p>
+    <h2 class="card-title">Extract CSV → JSON (per column)</h2>
+    <p class="card-subtitle">Select one or more CSV files, choose the key column and columns to export.</p>
   </header>
 
   <div class="card-content">
-    <p class="lead">Upload your CSV or Excel files. The first row is treated as header. For each selected column we'll produce a JSON of key:value pairs.</p>
+    <p class="lead">Upload your CSV files. The first row is treated as header. For each selected column we'll produce a JSON of key:value pairs.</p>
 
     <div class="controls">
       <input
         #fileInput
         id="csvFileInput"
         type="file"
-        accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        accept=".csv,text/csv"
         multiple
         hidden
         (change)="onFilesChange($event)"
@@ -28,7 +28,7 @@
         (drop)="$event.preventDefault(); onDrop($event)">
         <div class="drop-zone-content">
           <mat-icon>upload</mat-icon>
-          <div class="drop-text">Drag & drop CSV or Excel files here</div>
+          <div class="drop-text">Drag & drop CSV files here</div>
           <div class="or-text">or click to select files</div>
         </div>
       </div>
@@ -95,7 +95,7 @@
     @if (isProcessing) {
       <div class="overlay">
         <mat-progress-spinner color="primary" diameter="64" mode="indeterminate"></mat-progress-spinner>
-        <div class="overlay-text">Parsing files...</div>
+        <div class="overlay-text">Parsing CSV files...</div>
       </div>
     }
 

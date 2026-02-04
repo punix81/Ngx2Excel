@@ -2,6 +2,7 @@ import { Component, effect, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConvertCsvService } from './convert-excel-to-json.service';
+import { ExcelToJsonConverterService, ExcelSheetData } from './excel-to-json-converter.service';
 import { MatTableModule, MatTableDataSource, MatTable } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -29,38 +30,70 @@ export class ConvertExcelToJsonComponent {
   selectedColsMap: Record<string, Set<string>> = {};
   displayedColumns: string[] = ['name', 'size', 'actions'];
   isDragging = false;
+  sheetsMap: Record<string, ExcelSheetData[]> = {}; // For Excel files
 
-  private readonly svc = inject(ConvertCsvService);
+  readonly csvSvc = inject(ConvertCsvService);
+  readonly excelSvc = inject(ExcelToJsonConverterService);
+  private isProcessingExcel = false;
 
   constructor() {
-    // react to parsed results from service
+    // react to parsed results from CSV service
     effect(() => {
-      const parsed = this.svc.parsedResults();
+      const parsed = this.csvSvc.parsedResults();
       // update local maps when service parsedResults changes
-      this.headersMap = {};
-      this.rowsMap = {};
-      this.keyColMap = {};
-      this.selectedColsMap = {};
-      this.filenameList = [];
+      this.updateMapsFromCsv(parsed);
+    });
 
-      for (const [fileName, payload] of Object.entries(parsed)) {
-        this.filenameList.push(fileName);
-        this.rowsMap[fileName] = payload.rows;
-        this.headersMap[fileName] = payload.headers;
-        this.keyColMap[fileName] = payload.headers.includes('key') ? 'key' : (payload.headers[0] || '');
-        this.selectedColsMap[fileName] = new Set(payload.headers.filter(h => h !== this.keyColMap[fileName]));
-      }
+    // react to parsed results from Excel service
+    effect(() => {
+      const parsed = this.excelSvc.parsedResults();
+      // update local maps when service parsedResults changes
+      this.updateMapsFromExcel(parsed);
     });
 
     // keep table rendering in sync
     effect(() => {
-      const _p = this.svc.parsing();
+      const _csvParsing = this.csvSvc.parsing();
+      const _excelParsing = this.excelSvc.parsing();
       setTimeout(() => this.table?.renderRows());
     });
   }
 
+  private updateMapsFromCsv(parsed: Record<string, { rows: any[]; headers: string[] }>): void {
+    for (const [fileName, payload] of Object.entries(parsed)) {
+      if (!this.filenameList.includes(fileName)) {
+        this.filenameList.push(fileName);
+      }
+      this.rowsMap[fileName] = payload.rows;
+      this.headersMap[fileName] = payload.headers;
+      this.keyColMap[fileName] = payload.headers.includes('key') ? 'key' : (payload.headers[0] || '');
+      this.selectedColsMap[fileName] = new Set(payload.headers.filter(h => h !== this.keyColMap[fileName]));
+    }
+  }
+
+  private updateMapsFromExcel(parsed: Record<string, ExcelSheetData[]>): void {
+    for (const [fileName, sheetsData] of Object.entries(parsed)) {
+      this.sheetsMap[fileName] = sheetsData;
+      if (sheetsData.length > 0) {
+        // Use first sheet by default
+        const firstSheet = sheetsData[0];
+        if (!this.filenameList.includes(fileName)) {
+          this.filenameList.push(fileName);
+        }
+        this.rowsMap[fileName] = firstSheet.rows;
+        this.headersMap[fileName] = firstSheet.headers;
+        this.keyColMap[fileName] = firstSheet.headers.includes('key') ? 'key' : (firstSheet.headers[0] || '');
+        this.selectedColsMap[fileName] = new Set(firstSheet.headers.filter(h => h !== this.keyColMap[fileName]));
+      }
+    }
+  }
+
   get isProcessing(): boolean {
-    return this.svc.parsing();
+    return this.csvSvc.parsing() || this.excelSvc.parsing() || this.isProcessingExcel;
+  }
+
+  isExcelFile(fileName: string): boolean {
+    return fileName.toLowerCase().endsWith('.xlsx') || fileName.toLowerCase().endsWith('.xls');
   }
 
   onFilesChange(event: Event): void {
@@ -68,7 +101,13 @@ export class ConvertExcelToJsonComponent {
     if (!input.files) return;
     this.files = Array.from(input.files);
     this.filenameList = this.files.map(f => f.name);
-    this.svc.clear();
+    this.csvSvc.clear();
+    this.excelSvc.clear();
+    this.headersMap = {};
+    this.rowsMap = {};
+    this.keyColMap = {};
+    this.selectedColsMap = {};
+    this.sheetsMap = {};
     this.dataSource.data = this.files;
     setTimeout(() => this.table?.renderRows());
   }
@@ -93,14 +132,33 @@ export class ConvertExcelToJsonComponent {
 
     this.files = Array.from(files);
     this.filenameList = this.files.map(f => f.name);
-    this.svc.clear();
+    this.csvSvc.clear();
+    this.excelSvc.clear();
+    this.headersMap = {};
+    this.rowsMap = {};
+    this.keyColMap = {};
+    this.selectedColsMap = {};
+    this.sheetsMap = {};
     this.dataSource.data = this.files;
     setTimeout(() => this.table?.renderRows());
   }
 
   parseAll(): void {
     if (this.files.length === 0) return;
-    this.svc.parseFiles(this.files);
+
+    const csvFiles = this.files.filter(f => !this.isExcelFile(f.name));
+    const excelFiles = this.files.filter(f => this.isExcelFile(f.name));
+
+    if (csvFiles.length > 0) {
+      this.csvSvc.parseFiles(csvFiles);
+    }
+
+    if (excelFiles.length > 0) {
+      this.isProcessingExcel = true;
+      this.excelSvc.parseFiles(excelFiles).finally(() => {
+        this.isProcessingExcel = false;
+      });
+    }
   }
 
   removeFile(file: File): void {
@@ -122,12 +180,19 @@ export class ConvertExcelToJsonComponent {
     const selected = Array.from(this.selectedColsMap[fileName] || []);
     if (!keyCol || selected.length === 0) return;
     const rows = this.rowsMap[fileName] || [];
-    const jsons = this.svc.buildJsons(rows, keyCol, selected);
+
+    // Use the appropriate service based on file type
+    const jsons = this.isExcelFile(fileName)
+      ? this.excelSvc.buildJsons(rows, keyCol, selected)
+      : this.csvSvc.buildJsons(rows, keyCol, selected);
+
     for (const col of selected) {
       const blob = new Blob([JSON.stringify(jsons[col], null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `${this.sanitizeFilename(fileName)}_${this.sanitizeFilename(col)}.json`;
+      // Use column name directly as filename, add .json extension only once
+      const cleanColName = col.replace(/\.json$/i, '');
+      a.download = `${cleanColName}.json`;
       a.click();
       URL.revokeObjectURL(a.href);
     }
@@ -136,7 +201,13 @@ export class ConvertExcelToJsonComponent {
   reset(): void {
     this.files = [];
     this.filenameList = [];
-    this.svc.clear();
+    this.headersMap = {};
+    this.rowsMap = {};
+    this.keyColMap = {};
+    this.selectedColsMap = {};
+    this.sheetsMap = {};
+    this.csvSvc.clear();
+    this.excelSvc.clear();
     this.dataSource.data = this.files;
     setTimeout(() => this.table?.renderRows());
   }

@@ -1,0 +1,50 @@
+{
+  "name": "ngx2excel",
+  "version": "1.0.0",
+  "description": "Angular library for converting between Excel/CSV and JSON formats with ease. Built for Angular 17+, fully standalone and type-safe.",
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/punix81/ngx2excel"
+  },
+  "bugs": {
+    "url": "https://github.com/punix81/ngx2excel/issues"
+  },
+  "homepage": "https://github.com/punix81/ngx2excel#readme",
+  "keywords": [
+    "angular",
+    "excel",
+    "csv",
+    "json",
+    "conversion",
+    "xlsx",
+    "translation",
+    "standalone",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "@angular/animations": ">=17.0.0",
+    "@angular/cdk": ">=17.0.0",
+    "@angular/common": ">=17.0.0",
+    "@angular/core": ">=17.0.0",
+    "@angular/forms": ">=17.0.0",
+    "@angular/material": ">=17.0.0",
+    "@angular/platform-browser": ">=17.0.0",
+    "exceljs": ">=4.0.0",
+    "papaparse": ">=5.0.0",
+    "tslib": "^2.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/material": {
+      "optional": false
+    }
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  }
+}

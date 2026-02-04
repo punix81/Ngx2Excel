@@ -1,6 +1,5 @@
-import { Component, effect, inject, ViewChild } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
-import { ConvertJsonToExcelService } from './convert-json-to-excel.service';
+import { Component, effect, inject, ViewChild, Output, EventEmitter } from '@angular/core';
+import { JsonToExcelService } from '../../services/json-to-excel.service';
 import { MatSelectChange } from '@angular/material/select';
 import { MatTableModule, MatTableDataSource, MatTable } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,32 +7,49 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { ConvertedJsonToExcelFile } from '../../models/converted-file.model';
 
-
+/**
+ * Component to convert JSON files to Excel/CSV format
+ * Merges multiple JSON translation files into a single spreadsheet
+ *
+ * @example
+ * <ngx2excel-json-to-excel
+ *   (fileConverted)="onConversion($event)"
+ *   (error)="onError($event)">
+ * </ngx2excel-json-to-excel>
+ */
 @Component({
-  selector: 'app-convert-json-to-excel',
+  selector: 'ngx2excel-json-to-excel',
   standalone: true,
   imports: [
-    TranslateModule,
+    CommonModule,
     MatTableModule,
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule
-],
-  templateUrl: './convert-Json-to-Excel.component.html',
-  styleUrls: ['./convert-json-to-excel.component.scss']
+  ],
+  templateUrl: './json-to-excel.component.html',
+  styleUrls: ['./json-to-excel.component.scss']
 })
-export class ConvertJsonToExcelComponent {
+export class JsonToExcelComponent {
+  /** Emitted when file conversion is complete */
+  @Output() fileConverted = new EventEmitter<ConvertedJsonToExcelFile>();
+
+  /** Emitted on error */
+  @Output() error = new EventEmitter<string>();
+
   selectedFiles: File[] = [];
-  dataSource = new MatTableDataSource<File>(this.selectedFiles);
+  dataSource: MatTableDataSource<File> = new MatTableDataSource<File>(this.selectedFiles);
   @ViewChild(MatTable) table?: MatTable<File>;
   successMessage = '';
   outputFormat: 'xlsx' | 'csv' = 'xlsx';
   displayedColumns: string[] = ['name', 'size', 'actions'];
 
-  public readonly convertService = inject(ConvertJsonToExcelService);
+  public readonly convertService = inject(JsonToExcelService);
 
   // Drag state
   isDragging = false;
@@ -44,7 +60,8 @@ export class ConvertJsonToExcelComponent {
       if (res) {
         try {
           this.convertService.downloadFile(res);
-          this.successMessage = `Fichier ${res.fileExtension.toUpperCase()} généré avec succès!`;
+          this.successMessage = `File ${res.fileExtension.toUpperCase()} generated successfully!`;
+          this.fileConverted.emit(res);
           this.selectedFiles = [];
         } finally {
           this.convertService.clearResult();
@@ -55,6 +72,7 @@ export class ConvertJsonToExcelComponent {
     effect(() => {
       const err = this.convertService.error();
       if (err) {
+        this.error.emit(err);
       }
     });
   }
@@ -97,6 +115,7 @@ export class ConvertJsonToExcelComponent {
     const dt = event.dataTransfer;
     if (!dt) return;
     const files = dt.files;
+
     if (!files || files.length === 0) return;
 
     // convert FileList to array and reuse logic
@@ -128,7 +147,7 @@ export class ConvertJsonToExcelComponent {
 
   convertFiles(): void {
     if (this.selectedFiles.length === 0) {
-      this.convertService.error.set('Veuillez sélectionner au moins un fichier JSON');
+      this.error.emit('Please select at least one JSON file');
       return;
     }
 
@@ -138,15 +157,13 @@ export class ConvertJsonToExcelComponent {
   reset(): void {
     this.selectedFiles = [];
     this.outputFormat = 'xlsx';
+    this.successMessage = '';
     this.convertService.clearResult();
     this.dataSource.data = this.selectedFiles;
     setTimeout(() => this.table?.renderRows());
   }
 
   onReset(): void {
-    // safety log to help debug UI clicks
-    // eslint-disable-next-line no-console
-    console.log('onReset clicked — selectedFiles before reset:', this.selectedFiles.length);
     this.reset();
   }
 }
